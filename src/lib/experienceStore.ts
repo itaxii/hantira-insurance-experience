@@ -4,6 +4,7 @@ import type { Participant, RoomState, VoteRecord } from "../types";
 import { makeRoom } from "./roomState";
 import { hasSupabaseConfig, supabase } from "./supabaseClient";
 import { useLocalRoom } from "./localStore";
+import { ensureAnonymousAuth } from "./supabaseAuth";
 
 export function useExperienceStore(roomCode = appConfig.room.defaultCode) {
   const local = useLocalRoom();
@@ -93,11 +94,13 @@ export function useExperienceStore(roomCode = appConfig.room.defaultCode) {
       },
       async join(displayName: string, sessionId: string) {
         if (!room) return;
+        const authUserId = await ensureAnonymousAuth(client);
         const now = new Date().toISOString();
         const result = await client.from("participants").upsert(
           {
             room_id: room.id,
             session_id: sessionId,
+            auth_user_id: authUserId,
             display_name: displayName,
             last_seen_at: now
           },
@@ -108,6 +111,7 @@ export function useExperienceStore(roomCode = appConfig.room.defaultCode) {
       },
       async submitVote(questionId: string, sessionId: string, optionIds: string[], allowChange: boolean) {
         if (!room?.voting_open) return false;
+        await ensureAnonymousAuth(client);
         const existing = votes.filter((vote) => vote.question_id === questionId && vote.participant_session_id === sessionId);
         if (existing.length && !allowChange) return false;
         if (allowChange && existing.length) {

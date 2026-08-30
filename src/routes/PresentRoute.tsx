@@ -10,6 +10,7 @@ import { scenes } from "../data/scenes";
 import { getActiveBeat, getActiveScene, moveBeat } from "../lib/story";
 import { applyPosition } from "../lib/roomState";
 import { useExperienceStore } from "../lib/experienceStore";
+import { joinUrl } from "../lib/routing";
 
 export function PresentRoute() {
   const store = useExperienceStore();
@@ -18,7 +19,7 @@ export function PresentRoute() {
   const scene = getActiveScene(scenes, position);
   const beat = getActiveBeat(scenes, position);
   const interaction = scene.interaction;
-  const roomUrl = `${window.location.origin}/join/${store.room.code}`;
+  const roomUrl = joinUrl(window.location.origin, store.room.code);
   const sceneVotes = interaction ? store.votes.filter((vote) => vote.question_id === interaction.id) : [];
 
   const setPosition = (next: typeof position) => {

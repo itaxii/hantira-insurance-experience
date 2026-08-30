@@ -34,7 +34,7 @@ Do not put service-role keys, private credentials, or presenter passwords in fro
 
 ## Supabase
 
-Run `supabase/migrations/20260830160000_hantira_rooms.sql` in Supabase. See `docs/SUPABASE.md` for schema, RLS, realtime, and security notes.
+Enable Supabase Anonymous Sign-Ins, then run `supabase/migrations/20260830160000_hantira_rooms.sql` in Supabase. See `docs/SUPABASE.md` for schema, RLS, realtime, and security notes.
 
 ## Presentation Flow
 

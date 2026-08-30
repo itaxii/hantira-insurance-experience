@@ -93,6 +93,7 @@ export type Participant = {
   id: string;
   room_id: string;
   session_id: string;
+  auth_user_id?: string | null;
   display_name: string;
   joined_at: string;
   last_seen_at: string;

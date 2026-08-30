@@ -4,6 +4,7 @@ import { scenes } from "../data/scenes";
 import { useExperienceStore } from "../lib/experienceStore";
 import { applyPosition, makeRoom } from "../lib/roomState";
 import { moveBeat } from "../lib/story";
+import { appHref, joinUrl } from "../lib/routing";
 
 export function ControlRoute() {
   const store = useExperienceStore();
@@ -18,7 +19,7 @@ export function ControlRoute() {
     store.updateRoom(applyPosition(store.room, next, nextScene.interaction?.id ?? null));
   };
 
-  const joinUrl = useMemo(() => `${window.location.origin}/join/${store.room.code}`, [store.room.code]);
+  const currentJoinUrl = useMemo(() => joinUrl(window.location.origin, store.room.code), [store.room.code]);
 
   return (
     <main className="control">
@@ -27,14 +28,14 @@ export function ControlRoute() {
           <p className="eyebrow">Presenter Control</p>
           <h1>حنتيرة في عالم التأمين</h1>
         </div>
-        <a href="/present" target="_blank">Open /present</a>
+        <a href={appHref("/present")} target="_blank">Open /present</a>
       </header>
       <section className="control-grid">
         <div className="control-panel">
           <h2>Room</h2>
           <p className="room-code">Room: {store.room.code}</p>
-          <p>{joinUrl}</p>
-          <button onClick={() => navigator.clipboard?.writeText(joinUrl)}><Copy size={18} /> Copy Join Link</button>
+          <p>{currentJoinUrl}</p>
+          <button onClick={() => navigator.clipboard?.writeText(currentJoinUrl)}><Copy size={18} /> Copy Join Link</button>
           <button onClick={() => store.createRoom(String(Math.floor(1000 + Math.random() * 9000)))}>Create Room</button>
           <button onClick={() => store.updateRoom({ status: "join", current_scene: 1, current_beat: 0, joins_allowed: true })}>Show Join Screen</button>
           <button onClick={() => store.updateRoom({ status: "live", current_scene: 2, current_beat: 0, joins_allowed: false })}>ابدأ الرحلة</button>

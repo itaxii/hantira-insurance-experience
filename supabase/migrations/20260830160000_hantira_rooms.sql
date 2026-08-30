@@ -22,6 +22,7 @@ create table if not exists public.participants (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references public.rooms(id) on delete cascade,
   session_id text not null,
+  auth_user_id uuid references auth.users(id) on delete cascade,
   display_name text not null check (char_length(display_name) between 2 and 24),
   joined_at timestamptz not null default now(),
   last_seen_at timestamptz not null default now(),
@@ -41,6 +42,7 @@ create table if not exists public.votes (
 
 create index if not exists rooms_code_idx on public.rooms(code);
 create index if not exists participants_room_idx on public.participants(room_id);
+create index if not exists participants_auth_user_idx on public.participants(auth_user_id);
 create index if not exists participants_last_seen_idx on public.participants(room_id, last_seen_at desc);
 create index if not exists votes_room_question_idx on public.votes(room_id, question_id);
 create index if not exists votes_participant_idx on public.votes(room_id, participant_session_id);
@@ -63,6 +65,15 @@ for each row execute function public.touch_updated_at();
 alter table public.rooms enable row level security;
 alter table public.participants enable row level security;
 alter table public.votes enable row level security;
+
+revoke all on public.rooms from anon, authenticated;
+revoke all on public.participants from anon, authenticated;
+revoke all on public.votes from anon, authenticated;
+
+grant select on public.rooms to anon, authenticated;
+grant select, insert, update on public.participants to authenticated;
+grant select, insert, delete on public.votes to authenticated;
+grant select, insert, update, delete on public.rooms to authenticated;
 
 drop policy if exists "rooms are readable by anon" on public.rooms;
 create policy "rooms are readable by anon"
@@ -92,8 +103,11 @@ using (true);
 drop policy if exists "anon can join open rooms" on public.participants;
 create policy "anon can join open rooms"
 on public.participants for insert
-to anon, authenticated
+to authenticated
 with check (
+  auth.uid() is not null
+  and auth_user_id = auth.uid()
+  and
   exists (
     select 1 from public.rooms
     where rooms.id = participants.room_id
@@ -105,8 +119,11 @@ with check (
 drop policy if exists "participants can refresh their session row" on public.participants;
 create policy "participants can refresh their session row"
 on public.participants for update
-to anon, authenticated
+to authenticated
 using (
+  auth.uid() is not null
+  and auth_user_id = auth.uid()
+  and
   exists (
     select 1 from public.rooms
     where rooms.id = participants.room_id
@@ -114,6 +131,9 @@ using (
   )
 )
 with check (
+  auth.uid() is not null
+  and auth_user_id = auth.uid()
+  and
   exists (
     select 1 from public.rooms
     where rooms.id = participants.room_id
@@ -130,8 +150,16 @@ using (true);
 drop policy if exists "anon can vote only while voting is open" on public.votes;
 create policy "anon can vote only while voting is open"
 on public.votes for insert
-to anon, authenticated
+to authenticated
 with check (
+  auth.uid() is not null
+  and exists (
+    select 1 from public.participants
+    where participants.room_id = votes.room_id
+      and participants.session_id = votes.participant_session_id
+      and participants.auth_user_id = auth.uid()
+  )
+  and
   exists (
     select 1 from public.rooms
     where rooms.id = votes.room_id
