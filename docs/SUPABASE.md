@@ -3,10 +3,11 @@
 ## Setup
 
 1. Create or open a Supabase project.
-2. Run `supabase/migrations/20260830160000_hantira_rooms.sql` in the SQL editor or through the Supabase CLI.
+2. Connect the Supabase MCP server from Codex if you want Codex to apply and verify the database changes directly. This repo includes `.mcp.json` pointing to `https://mcp.supabase.com/mcp`.
 3. Enable Anonymous Sign-Ins in Supabase Auth settings. Audience users will not see a login, but RLS needs an authenticated anonymous user id.
-4. Enable Realtime for `rooms`, `participants`, and `votes` if it is not already enabled by the migration.
-4. Add the public values to `.env` locally or deployment environment:
+4. Run `supabase/migrations/20260830160000_hantira_rooms.sql` in the SQL editor, Supabase CLI, or Supabase MCP `execute_sql`.
+5. Enable Realtime for `rooms`, `participants`, and `votes` if it is not already enabled by the migration.
+6. Add the public values to `.env` locally or deployment environment:
 
 ```bash
 VITE_SUPABASE_URL=
