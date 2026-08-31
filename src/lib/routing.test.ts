@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeAppPath } from "./routing";
+import { consumeRedirectPath, normalizeAppPath } from "./routing";
 
 describe("routing helpers", () => {
   it("normalizes GitHub Pages project paths to app routes", () => {
@@ -9,5 +9,14 @@ describe("routing helpers", () => {
 
   it("keeps root-hosted routes unchanged", () => {
     expect(normalizeAppPath("/present")).toBe("/present");
+  });
+
+  it("consumes GitHub Pages redirect handoff once", () => {
+    const storage = window.sessionStorage;
+    storage.setItem("redirect", "/hantira-insurance-experience/join/7284?x=1#top");
+
+    expect(consumeRedirectPath(storage)).toBe("/join/7284");
+    expect(storage.getItem("redirect")).toBeNull();
+    expect(consumeRedirectPath(storage)).toBeNull();
   });
 });

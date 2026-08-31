@@ -6,6 +6,13 @@ export function normalizeAppPath(pathname: string) {
   return pathname;
 }
 
+export function consumeRedirectPath(storage: Storage | undefined = typeof window !== "undefined" ? window.sessionStorage : undefined) {
+  const redirected = storage?.getItem("redirect");
+  if (!redirected) return null;
+  storage?.removeItem("redirect");
+  return normalizeAppPath(redirected.split(/[?#]/)[0] || "/");
+}
+
 export function appHref(path: string) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return import.meta.env.BASE_URL === "/" ? normalized : `${import.meta.env.BASE_URL.replace(/\/$/, "")}${normalized}`;
