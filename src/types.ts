@@ -30,7 +30,9 @@ export type Beat = {
   kicker?: string;
   body?: string;
   dialogue?: string;
+  speaker?: "hantira" | "faheem";
   visual?: string;
+  mood?: "dark";
   hantira?: { expression?: CharacterExpression; animation?: CharacterAnimation; facing?: "left" | "right" };
   faheem?: { expression?: CharacterExpression; animation?: CharacterAnimation; facing?: "left" | "right" };
   effects?: string[];

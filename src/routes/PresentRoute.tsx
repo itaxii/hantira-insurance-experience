@@ -1,9 +1,9 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useMemo, useState } from "react";
 import { appConfig } from "../config";
 import { Faheem, Hantira } from "../components/characters/StickCharacter";
-import { BrokerSlider, BusinessAssets, OfferCards, SimpleFlow, TermCloud } from "../components/LineAssets";
+import { SceneVisual } from "../components/visuals/SceneVisual";
 import { ResultsView } from "../components/ResultsView";
 import { soundManager } from "../components/SoundManager";
 import { scenes } from "../data/scenes";
@@ -12,6 +12,20 @@ import { applyPosition } from "../lib/roomState";
 import { useExperienceStore } from "../lib/experienceStore";
 import { joinUrl } from "../lib/routing";
 import { useActiveRoomCode } from "../lib/activeRoom";
+
+const CENTER_VISUALS = new Set(["dark", "dark-center", "quiet", "final-question", "logo", "peek", "remove-words", "broker-value", "impact", "formula"]);
+const SPEAKER_LABEL = { hantira: "حنتيرة", faheem: "فهيم" } as const;
+const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+const effectCues: Record<string, string> = {
+  footsteps: "step",
+  "car-engine": "engine",
+  crash: "crash",
+  shake: "crash",
+  alarm: "alarm",
+  "invoice-reveal": "thud",
+  "paper-drop": "paper"
+};
 
 export function PresentRoute() {
   const [roomCode] = useActiveRoomCode();
@@ -46,6 +60,17 @@ export function PresentRoute() {
     return () => window.removeEventListener("keydown", handler);
   }, [position.sceneIndex, position.beatIndex, store.room, interaction]);
 
+  useEffect(() => {
+    soundManager.setMuted(store.room.muted);
+  }, [store.room.muted]);
+
+  useEffect(() => {
+    beat?.effects?.forEach((effect) => {
+      const cue = effectCues[effect];
+      if (cue) soundManager.play(cue);
+    });
+  }, [beat?.id]);
+
   const progress = useMemo(() => Math.round(((position.sceneIndex + 1) / scenes.length) * 100), [position.sceneIndex]);
 
   if (!started) {
@@ -54,7 +79,7 @@ export function PresentRoute() {
         <div>
           <p className="eyebrow">Interactive Storytelling</p>
           <h1>{appConfig.title}</h1>
-          <p>اضغط Start Experience لبدء العرض وتفعيل الصوت أو Fullscreen لو المتصفح سمح.</p>
+          <p className="start-note">اضغط Start Experience لبدء العرض وتفعيل الصوت أو Fullscreen لو المتصفح سمح.</p>
           <button
             className="primary"
             onClick={() => {
@@ -65,68 +90,91 @@ export function PresentRoute() {
           >
             Start Experience
           </button>
+          <p className="hint-strip">→ / Space: التالي &nbsp;·&nbsp; ←: السابق &nbsp;·&nbsp; V: تصويت &nbsp;·&nbsp; R: كشف &nbsp;·&nbsp; M: صمت &nbsp;·&nbsp; F: ملء الشاشة</p>
         </div>
       </main>
     );
   }
 
+  const visual = beat?.visual;
+  const hasVisual = Boolean(visual);
+  const isCenter = !hasVisual || CENTER_VISUALS.has(visual ?? "");
+  const moodClass = beat?.mood === "dark" ? " mood-dark" : "";
+  const shakeClass = beat?.effects?.includes("shake") ? " shake" : "";
+  const stageClass = ["stage", isCenter ? "stage--center" : "", scene.kind === "interaction" && hasVisual ? "stage--ask" : ""].filter(Boolean).join(" ");
+
   return (
-    <main className={`presentation visual-${beat?.visual ?? "plain"} ${beat?.effects?.includes("shake") ? "shake" : ""}`}>
-      <div className="top-strip">
-        <span>{scene.title}</span>
-        <span>{store.participants.length} مشارك</span>
-      </div>
-      <div className="progress"><span style={{ width: `${progress}%` }} /></div>
-      <AnimatePresence mode="wait">
-        <motion.section
-          key={`${scene.id}-${beat?.id}`}
-          className="stage"
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -24, scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        >
-          <div className="stage-copy">
-            {beat?.kicker && <p className="kicker">{beat.kicker}</p>}
-            {beat?.headline && <h1>{beat.headline}</h1>}
-            {beat?.body && <p className="body-copy">{beat.body}</p>}
-            {beat?.dialogue && <p className="dialogue">{beat.dialogue}</p>}
-            {interaction && (
-              <div className="interaction-panel">
-                <h2>{interaction.question}</h2>
-                <p>{store.room.voting_open ? "التصويت مفتوح" : "التصويت مقفول"} • النتائج تظهر بقرار المقدم</p>
-                {store.room.results_visible && <ResultsView interaction={interaction} votes={sceneVotes} namesVisible={store.room.names_visible} />}
-                {store.room.answer_revealed && interaction.explanation && <p className="explanation">{interaction.explanation}</p>}
-              </div>
-            )}
-          </div>
-          <div className="stage-visual">
-            {scene.onceOnlyQr ? (
-              <div className="qr-wrap">
-                <QRCodeSVG value={roomUrl} size={260} bgColor="#f8f5ef" fgColor="#171717" />
-                <strong>Room: {store.room.code}</strong>
-                <span>● {store.participants.length} مشارك</span>
-              </div>
-            ) : beat?.visual?.includes("assets") || beat?.visual?.includes("business") || beat?.visual?.includes("logistics") ? (
-              <BusinessAssets variant={beat.visual} />
-            ) : beat?.visual === "three-offers" ? (
-              <OfferCards />
-            ) : beat?.visual === "term-cloud" ? (
-              <TermCloud />
-            ) : beat?.visual === "broker-slider" ? (
-              <BrokerSlider />
-            ) : beat?.body?.includes("→") ? (
-              <SimpleFlow text={beat.body} />
-            ) : (
-              <div className="scene-object">{beat?.visual ?? "story"}</div>
-            )}
-            <div className="characters">
-              {beat?.hantira && <Hantira className="character" {...beat.hantira} />}
-              {beat?.faheem && <Faheem className="character faheem" {...beat.faheem} />}
+    <MotionConfig reducedMotion="user">
+      <main className={`presentation visual-${visual ?? "plain"}${moodClass}${shakeClass}`}>
+        <div className="top-strip">
+          <span>{scene.title}</span>
+          <span>{store.participants.length} مشارك</span>
+        </div>
+        <div className="progress"><span style={{ width: `${progress}%` }} /></div>
+        <AnimatePresence mode="wait">
+          <motion.section
+            key={`${scene.id}-${beat?.id}`}
+            className={stageClass}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -18 }}
+            transition={{ duration: 0.34, ease: [0.22, 0.61, 0.21, 1] }}
+          >
+            <div className="stage-copy">
+              {beat?.kicker && <p className="kicker">{beat.kicker}</p>}
+              {beat?.headline && <h1>{beat.headline}</h1>}
+              {beat?.body && <p className="body-copy">{beat.body}</p>}
+              {beat?.dialogue && (
+                <div className="dialogue-bubble">
+                  <span className="dialogue-speaker">{SPEAKER_LABEL[beat.speaker ?? "hantira"]}</span>
+                  <p>{beat.dialogue}</p>
+                </div>
+              )}
+              {interaction && (
+                <div className="interaction-panel">
+                  <h2>{interaction.question}</h2>
+                  <p className="vote-status">
+                    {store.room.voting_open ? "التصويت مفتوح — شاركوا من الموبايل" : "التصويت مقفول"} • النتائج تظهر بقرار المقدم
+                  </p>
+                  {!store.room.results_visible && (
+                    <div className={`interaction-options count-${interaction.options.length}`}>
+                      {interaction.options.map((option, index) => (
+                        <span className="interaction-option" key={option.id}>
+                          <span className={`option-letter${interaction.type === "multi" ? " option-letter--multi" : ""}`}>
+                            {interaction.type === "multi" ? index + 1 : OPTION_LETTERS[index]}
+                          </span>
+                          {option.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {store.room.results_visible && <ResultsView interaction={interaction} votes={sceneVotes} namesVisible={store.room.names_visible} />}
+                  {store.room.answer_revealed && interaction.explanation && <p className="explanation">{interaction.explanation}</p>}
+                </div>
+              )}
             </div>
-          </div>
-        </motion.section>
-      </AnimatePresence>
-    </main>
+            {hasVisual && (
+              <div className="stage-visual">
+                {scene.onceOnlyQr ? (
+                  <div className="qr-wrap">
+                    <QRCodeSVG value={roomUrl} size={260} bgColor="#fffdf7" fgColor="#1a1915" />
+                    <strong>Room: {store.room.code}</strong>
+                    <span>{store.participants.length} مشارك معانا</span>
+                    <p className="qr-hint">امسح مرة واحدة — وهتفضل معانا لحد نهاية الرحلة.</p>
+                  </div>
+                ) : (
+                  <SceneVisual id={visual ?? ""} />
+                )}
+                <div className="characters">
+                  {beat?.hantira && <Hantira className="character" {...beat.hantira} />}
+                  {beat?.faheem && <Faheem className="character faheem" {...beat.faheem} />}
+                </div>
+              </div>
+            )}
+          </motion.section>
+        </AnimatePresence>
+        <p className="hint-strip">→ / Space: التالي · ←: السابق · V: تصويت · R: كشف النتائج · M: صمت</p>
+      </main>
+    </MotionConfig>
   );
 }

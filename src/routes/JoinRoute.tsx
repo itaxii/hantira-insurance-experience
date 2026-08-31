@@ -1,19 +1,21 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Hantira } from "../components/characters/StickCharacter";
+import { CheckMark } from "../components/visuals/primitives";
 import { scenes } from "../data/scenes";
 import { useExperienceStore } from "../lib/experienceStore";
 import { nicknameErrorMessage, sanitizeNickname } from "../lib/nickname";
 import { createParticipantSessionId, loadStoredSession, rememberVote, saveStoredSession, selectedVotesFor, type StoredSession } from "../lib/session";
 import { canJoinRoom } from "../lib/roomState";
 import { isCorrectSelection } from "../lib/votes";
+import type { CharacterAnimation, CharacterExpression } from "../types";
 
-const waiting = [
-  "إنت دلوقتي مع حنتيرة.",
-  "استنى السؤال الجاي...",
-  "حنتيرة لسه بيقرر.",
-  "خليك جاهز... حنتيرة غالبًا هيعمل مصيبة تانية.",
-  "فهيم بيحاول يلحق الموقف."
+const waiting: Array<{ text: string; expression: CharacterExpression; animation: CharacterAnimation }> = [
+  { text: "إنت دلوقتي مع حنتيرة.", expression: "happy", animation: "wave" },
+  { text: "استنى السؤال الجاي...", expression: "thinking", animation: "idle" },
+  { text: "حنتيرة لسه بيقرر.", expression: "suspicious", animation: "think" },
+  { text: "خليك جاهز... حنتيرة غالبًا هيعمل مصيبة تانية.", expression: "shocked", animation: "panic" },
+  { text: "فهيم بيحاول يلحق الموقف.", expression: "neutral", animation: "walk" }
 ];
 
 export function JoinRoute({ roomCode }: { roomCode: string }) {
@@ -26,7 +28,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
   const interaction = scene?.interaction;
   const votes = interaction ? selectedVotesFor(store.votes, session?.participantSessionId ?? "", interaction.id) : [];
   const selected = votes.length ? votes : draftSelected;
-  const message = waiting[(store.room.current_scene + store.room.current_beat) % waiting.length];
+  const waitingState = waiting[(store.room.current_scene + store.room.current_beat) % waiting.length];
 
   useEffect(() => {
     if (session) store.join(session.nickname, session.participantSessionId);
@@ -42,7 +44,13 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
   );
 
   if (store.room.code !== roomCode) {
-    return <MobileShell status="offline" nickname=""><h1>الغرفة غير موجودة</h1><p>راجع رقم الغرفة مع المقدم.</p></MobileShell>;
+    return (
+      <MobileShell status="offline" nickname="">
+        <Hantira className="mobile-hantira" expression="confused" animation="look-left" />
+        <h1>الغرفة غير موجودة</h1>
+        <p className="privacy">راجع رقم الغرفة مع المقدم.</p>
+      </MobileShell>
+    );
   }
 
   if (!session) {
@@ -50,7 +58,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
       <MobileShell status="offline" nickname="">
         <Hantira className="mobile-hantira" expression="happy" animation="wave" />
         <h1>أهلاً بيك في رحلة حنتيرة</h1>
-        <p>اختار اسم يظهر بيه تصويتك</p>
+        <p className="privacy">اختار اسم يظهر بيه تصويتك</p>
         <input value={name} onChange={(event) => setName(event.target.value)} placeholder="مثال: محمد / Mo / Batman / أبو حنتيرة" maxLength={32} />
         {error && <p className="error">{error}</p>}
         <p className="privacy">الاسم اللي تختاره ممكن يظهر على شاشة العرض، فاختار اسم مناسب للعرض.</p>
@@ -80,9 +88,10 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
   if (!interaction) {
     return (
       <MobileShell status="online" nickname={session.nickname}>
-        <Hantira className="mobile-hantira" expression="thinking" animation="idle" />
+        <Hantira className="mobile-hantira" expression={waitingState.expression} animation={waitingState.animation} />
         <h1>تمام يا {session.nickname}</h1>
-        <p>{message}</p>
+        <p className="privacy">{waitingState.text}</p>
+        <p className="personal-choice">متنساش تبص على الشاشة الكبيرة — الحتة الجاية جاية.</p>
       </MobileShell>
     );
   }
@@ -95,6 +104,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
     <MobileShell status="online" nickname={session.nickname}>
       <p className="eyebrow">{store.room.voting_open ? "التصويت مفتوح" : "التصويت مقفول"}</p>
       <h1>{interaction.question}</h1>
+      {interaction.type === "multi" && <p className="privacy">اختار كل الحاجات اللي تشوفها مناسبة.</p>}
       <div className="vote-options">
         {interaction.options.map((option) => {
           const active = selected.includes(option.id);
@@ -111,7 +121,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
                 }
               }}
             >
-              <span>{active ? "✓" : ""}</span>
+              <span className="check-slot">{active && <CheckMark size={22} />}</span>
               {option.label}
             </button>
           );
@@ -127,7 +137,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
             if (ok) setSession(rememberVote(session, interaction.id, selected));
           }}
         >
-          سجل اختياري
+          {interaction.type === "multi" && selected.length > 1 ? `سجل اختياري (${selected.length})` : "سجل اختياري"}
         </button>
       )}
       {locked && <p className="success">تم تسجيل اختيارك يا {session.nickname}. التصويت مقفول للتغيير.</p>}
@@ -160,8 +170,8 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
 function MobileShell({ children, status, nickname }: { children: React.ReactNode; status: "online" | "offline"; nickname: string }) {
   return (
     <main className="audience">
-      <header>
-        <span className={status === "online" ? "online" : "offline"}>●</span>
+      <header className={status}>
+        <span className={`status-dot ${status}`} aria-hidden="true" />
         {nickname || "Guest"}
       </header>
       <section>{children}</section>

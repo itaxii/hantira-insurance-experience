@@ -18,10 +18,10 @@ export function sanitizeNickname(raw: string): NicknameResult {
 export function nicknameErrorMessage(error: NicknameError) {
   switch (error) {
     case "name_required":
-      return "اكتب اسم يظهر بيه تصويتك.";
+      return "لازم تكتب اسم قبل ما تدخل الرحلة.";
     case "name_too_short":
-      return "الاسم لازم يكون حرفين على الأقل.";
+      return "الاسم قصير جدًا — اكتب اسم من حرفين على الأقل.";
     case "name_too_long":
-      return "اختار اسم أقصر شوية، بحد أقصى 24 حرف.";
+      return "الاسم طويل أوي — خليه 24 حرف بأقصى حدود.";
   }
 }

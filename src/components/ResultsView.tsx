@@ -31,7 +31,7 @@ export function ResultsView({
           <div className="result-row" key={aggregate.optionId}>
             <div className="result-meta">
               <span>{option?.label}</span>
-              <strong>{width}%</strong>
+              <strong>{width}% · {aggregate.count}</strong>
             </div>
             <div className="bar-track">
               <motion.div className="bar-fill" initial={{ width: 0 }} animate={{ width: `${width}%` }} />

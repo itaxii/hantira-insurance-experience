@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aggregateVotes, canSubmitVote } from "./votes";
+import { aggregateVotes, canSubmitVote, personalResultText } from "./votes";
 
 describe("vote rules", () => {
   it("locks a participant vote when answer changes are disabled", () => {
@@ -27,5 +27,27 @@ describe("vote rules", () => {
       { optionId: "d", count: 2, percent: 50, names: ["Sara", "Batman"] },
       { optionId: "motor", count: 1, percent: 25, names: ["محمد"] }
     ]);
+  });
+
+  it("keeps incorrect personal result feedback playful and respectful", () => {
+    const message = personalResultText(
+      {
+        id: "who-pays",
+        sceneId: "who-pays",
+        type: "single",
+        question: "مين هيدفع؟",
+        options: [
+          { id: "a", label: "حنتيرة" },
+          { id: "d", label: "على حسب الحالة والتغطية" }
+        ],
+        correctAnswer: "d",
+        allowChange: false
+      },
+      "محمد",
+      ["حنتيرة"]
+    );
+
+    expect(message).toContain("حنتيرة ضحك عليك");
+    expect(message).toContain("الإجابة الأفضل: على حسب الحالة والتغطية");
   });
 });

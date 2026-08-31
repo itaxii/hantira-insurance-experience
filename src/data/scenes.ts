@@ -5,11 +5,11 @@ export const scenes: Scene[] = [
     id: "meet-hantira",
     title: "Meet Hantira",
     beats: [
-      { id: "dark", headline: "ده حنتيرة.", visual: "dark", hantira: { animation: "walk", expression: "neutral" }, effects: ["footsteps"] },
+      { id: "dark", visual: "dark", mood: "dark", headline: "ده حنتيرة.", hantira: { animation: "walk", expression: "neutral" }, effects: ["footsteps"] },
       { id: "company", headline: "حنتيرة عنده شركة.", visual: "business-assets", hantira: { animation: "wave", expression: "happy" } },
       { id: "assets", headline: "مكتب، عربيات، موظفين، مخزن، وبضاعة.", visual: "assets-lineup", hantira: { animation: "point", expression: "proud" } },
-      { id: "cost", dialogue: "وفي حاجة واحدة بس مش بحب أصرف عليها...", hantira: { expression: "suspicious", animation: "think" } },
-      { id: "insurance", headline: "التأمين", dialogue: "يعني أدفع فلوس... عشان حاجة ممكن ما تحصلش؟", hantira: { expression: "confused", animation: "facepalm" } }
+      { id: "cost", dialogue: "وفي حاجة واحدة بس مش بحب أصرف عليها...", speaker: "hantira", hantira: { expression: "suspicious", animation: "think" } },
+      { id: "insurance", visual: "dark-center", mood: "dark", headline: "التأمين", dialogue: "يعني أدفع فلوس... عشان حاجة ممكن ما تحصلش؟", speaker: "hantira", hantira: { expression: "confused", animation: "facepalm" } }
     ]
   },
   {
@@ -53,9 +53,9 @@ export const scenes: Scene[] = [
     title: "The Nice Morning",
     beats: [
       { id: "time", kicker: "Monday — 8:30 AM", headline: "صباح الفل... النهارده يوم هادي جدًا.", visual: "sunny-road", hantira: { animation: "idle", expression: "happy" }, effects: ["car-engine"] },
-      { id: "drive", headline: "حنتيرة سايق ومطمن.", visual: "driving", hantira: { expression: "happy" } },
+      { id: "drive", headline: "حنتيرة سايق ومطمن.", visual: "driving", effects: ["car-engine"] },
       { id: "crash", headline: "BAAAAM", visual: "crash", hantira: { expression: "shocked", animation: "panic" }, effects: ["crash", "shake"] },
-      { id: "invoice", headline: "350,000 EGP", body: "هو الرقم ده فيه decimal وأنا مش شايفه؟", visual: "invoice", hantira: { expression: "shocked", animation: "fall" }, effects: ["invoice-reveal"] }
+      { id: "invoice", kicker: "INVOICE", visual: "invoice", dialogue: "هو الرقم ده فيه decimal وأنا مش شايفه؟", speaker: "hantira", hantira: { expression: "shocked", animation: "fall" }, effects: ["invoice-reveal"] }
     ]
   },
   {
@@ -78,33 +78,40 @@ export const scenes: Scene[] = [
       explanation: "التأمين مش معناه إن شركة التأمين تدفع أي حاجة. الدفع يعتمد على التغطية والشروط وحدود الوثيقة.",
       nameVisualization: true
     },
-    beats: [{ id: "ask", headline: "مين هيدفع؟", hantira: { expression: "worried", animation: "think" } }]
+    beats: [{ id: "ask", headline: "مين هيدفع الـ 350 ألف؟", visual: "invoice", hantira: { expression: "worried", animation: "think" } }]
   },
   {
     id: "what-is-risk",
     title: "What Is Risk?",
     beats: [
-      { id: "risk", headline: "RISK", body: "حاجة ممكن تحصل.", visual: "broken-car", hantira: { expression: "worried" } },
+      { id: "risk", kicker: "RISK", headline: "حاجة ممكن تحصل.", visual: "broken-car", hantira: { expression: "worried" } },
       { id: "cost", headline: "ولو حصلت... بتكلف فلوس.", visual: "impact" },
-      { id: "formula", headline: "Probability × Impact", body: "تبسيط يساعدنا نفهم الفكرة، مش قانون ثابت لكل الحالات.", visual: "formula" },
-      { id: "ready", dialogue: "المشكلة مش إن الحاجة ممكن تحصل... المشكلة إنها تحصل وأنا مش مستعد لها.", hantira: { expression: "thinking", animation: "think" } }
+      { id: "formula", headline: "Probability × Impact", body: "تبسيط يساعدنا نفهم الفكرة — ده نموذج تعليمي مبسّط، مش قانون ثابت لكل الحالات.", visual: "formula" },
+      { id: "ready", dialogue: "المشكلة مش إن الحاجة ممكن تحصل...", speaker: "hantira", hantira: { expression: "thinking", animation: "think" } },
+      { id: "ready-2", dialogue: "المشكلة إنها تحصل وأنا مش مستعد لها.", speaker: "hantira", hantira: { expression: "worried" } }
     ]
   },
   {
     id: "insurance-30",
     title: "Insurance In 30 Seconds",
     beats: [
-      { id: "without", headline: "بدون تأمين", body: "Incident → حنتيرة → Financial Loss", visual: "without-insurance", hantira: { expression: "worried" } },
-      { id: "with", headline: "مع التأمين", body: "حنتيرة → Premium → Insurance Company", visual: "with-insurance" },
-      { id: "covered", headline: "لو الخطر مغطى", body: "Insurance Company → تعويض طبقًا للوثيقة → حنتيرة", visual: "covered-loss", hantira: { expression: "relieved" } },
-      { id: "takeaway", headline: "التأمين بينقل جزء من الخطر المالي", body: "مقابل Premium وطبقًا لشروط الوثيقة.", dialogue: "أنا مش بشتري حادث... أنا بشتري حماية مالية لو حصل خطر مغطى." }
+      { id: "without", headline: "بدون تأمين", visual: "without-insurance", hantira: { expression: "worried" } },
+      { id: "with", headline: "مع التأمين", visual: "with-insurance" },
+      { id: "covered", headline: "لو الخطر مغطى", visual: "covered-loss", hantira: { expression: "relieved" } },
+      {
+        id: "takeaway",
+        headline: "التأمين بينقل جزء من الخطر المالي للجهة المؤمِّنة مقابل Premium وطبقًا لشروط الوثيقة.",
+        dialogue: "أنا مش بشتري حادث... أنا بشتري حماية مالية لو حصل خطر مغطى.",
+        speaker: "hantira",
+        hantira: { expression: "proud" }
+      }
     ]
   },
   {
     id: "shopping",
     title: "Hantira Goes Shopping",
     beats: [
-      { id: "market", dialogue: "تمام... هأمّن.", visual: "insurance-market", hantira: { expression: "proud", animation: "walk" } },
+      { id: "market", dialogue: "تمام... هأمّن.", speaker: "hantira", visual: "insurance-market", hantira: { expression: "proud", animation: "walk" } },
       { id: "offers", headline: "Insurance Market", body: "Company A • Company B • Company C • Company D • Company E • Company F", visual: "offer-storm", hantira: { expression: "confused", animation: "panic" } },
       { id: "pile", headline: "العروض كترت.", visual: "paper-pile", hantira: { expression: "shocked" }, effects: ["paper-drop"] }
     ]
@@ -113,8 +120,8 @@ export const scenes: Scene[] = [
     id: "choose-offer",
     title: "Choose The Offer",
     beats: [
-      { id: "offers", headline: "ثلاث عروض وهمية", body: "Offer A: Premium 20K\nOffer B: Premium 27K\nOffer C: Premium 35K", visual: "three-offers", hantira: { expression: "happy", animation: "point" } },
-      { id: "cheap", dialogue: "الأرخص طبعًا!", hantira: { expression: "proud", animation: "point" } }
+      { id: "offers", headline: "ثلاث عروض وهمية", visual: "three-offers", hantira: { expression: "happy", animation: "point" } },
+      { id: "cheap", dialogue: "الأرخص طبعًا!", speaker: "hantira", hantira: { expression: "proud", animation: "point" } }
     ]
   },
   {
@@ -138,15 +145,15 @@ export const scenes: Scene[] = [
       nameVisualization: true
     },
     beats: [
-      { id: "ask", headline: "اختار العرض", visual: "three-offers" },
-      { id: "reveal", headline: "Right Fit = Best", body: "Offer A: Deductible 100K، Coverage Limited، Exclusions Several\nOffer B: Deductible 25K، Coverage Better، Claims Support Good\nOffer C: Deductible 10K، Coverage Broader، Additional Benefits", dialogue: "أنا كنت هلبس.", hantira: { expression: "shocked", animation: "facepalm" } }
+      { id: "ask", headline: "اختار العرض", visual: "three-offers", hantira: { expression: "thinking" } },
+      { id: "reveal", headline: "Right Fit = Best", visual: "offer-details", dialogue: "أنا كنت هلبس.", speaker: "hantira", hantira: { expression: "shocked", animation: "facepalm" } }
     ]
   },
   {
     id: "complexity",
     title: "Complexity Explosion",
     beats: [
-      { id: "terms", headline: "Premium • Deductible • Limits • Exclusions • Conditions • Claims • Add-ons • Coverage", visual: "term-cloud", hantira: { expression: "worried", animation: "panic" } },
+      { id: "terms", headline: "لغة التأمين...", visual: "term-cloud", hantira: { expression: "worried", animation: "panic" } },
       { id: "freeze", headline: "Freeze.", body: "لما التفاصيل تكتر، القرار محتاج تنظيم.", visual: "freeze", hantira: { expression: "shocked" } }
     ]
   },
@@ -155,24 +162,26 @@ export const scenes: Scene[] = [
     title: "Meet Faheem",
     beats: [
       { id: "enter", headline: "فهيم دخل بهدوء.", visual: "faheem-entry", hantira: { expression: "confused" }, faheem: { expression: "neutral", animation: "walk" } },
-      { id: "not-agent", dialogue: "حنتيرة: إنت مندوب شركة أنهي واحدة؟\nفهيم: ولا واحدة.", faheem: { expression: "happy" } },
-      { id: "broker", headline: "INSURANCE BROKER", dialogue: "أنا مش هختارلك شركة وخلاص... أنا هساعدك تختار الحل المناسب ليك.", faheem: { expression: "proud", animation: "point" } }
+      { id: "hantira-asks", dialogue: "إنت مندوب شركة أنهي واحدة؟", speaker: "hantira", hantira: { expression: "suspicious" }, faheem: { expression: "neutral" } },
+      { id: "faheem-reply", dialogue: "ولا واحدة.", speaker: "faheem", faheem: { expression: "happy" }, hantira: { expression: "confused" } },
+      { id: "broker", kicker: "INSURANCE BROKER", headline: "مش مندوب... وسيط.", dialogue: "أنا مش هختارلك شركة وخلاص... أنا هساعدك تختار الحل المناسب ليك.", speaker: "faheem", faheem: { expression: "proud", animation: "point" } }
     ]
   },
   {
     id: "broker-does",
     title: "What Does A Broker Do?",
     beats: [
-      { id: "flow", headline: "Client → Understand Needs → Identify Risks → Design Coverage → Approach Market", visual: "broker-flow", faheem: { expression: "neutral", animation: "point" } },
-      { id: "flow2", headline: "Compare → Negotiate → Recommend → Arrange Coverage → Manage Policies → Support Claims → Renew & Improve", visual: "broker-flow" },
-      { id: "role", dialogue: "دوري مش أوصل ورقة من هنا لهنا. دوري إني أبسّط السوق وأساعدك تاخد قرار أفضل.", faheem: { expression: "happy" } }
+      { id: "flow", headline: "رحلة الوسيط — من أول العميل", visual: "broker-flow", faheem: { expression: "neutral", animation: "point" } },
+      { id: "flow2", headline: "لحد ما التغطية شغالة وتتطور", visual: "broker-flow-2" },
+      { id: "role", dialogue: "دوري مش أوصل ورقة من هنا لهنا.", speaker: "faheem", faheem: { expression: "suspicious" } },
+      { id: "role-2", dialogue: "دوري إني أبسّط السوق وأساعدك تاخد قرار أفضل.", speaker: "faheem", faheem: { expression: "proud" } }
     ]
   },
   {
     id: "hantira-logistics",
     title: "Hantira Logistics",
     beats: [
-      { id: "business", headline: "Hantira Logistics", body: "30 Trucks • 1 Warehouse • 120 Employees • International Shipments", visual: "logistics" },
+      { id: "business", headline: "Hantira Logistics", visual: "logistics" },
       { id: "risks", headline: "إيه المخاطر اللي شايفينها؟", hantira: { expression: "thinking", animation: "think" }, faheem: { expression: "neutral" } }
     ]
   },
@@ -198,17 +207,19 @@ export const scenes: Scene[] = [
       nameVisualization: false
     },
     beats: [
-      { id: "ask", headline: "Build Protection", visual: "shield-build" },
-      { id: "shield", headline: "برنامج حماية مناسب للنشاط", dialogue: "حنتيرة: أنا كنت فاكر إني محتاج وثيقة.\nفهيم: إنت محتاج برنامج حماية مناسب لنشاطك.", visual: "shield" }
+      { id: "ask", headline: "Build Protection", visual: "shield-build", faheem: { expression: "neutral", animation: "point" } },
+      { id: "shield", headline: "برنامج حماية مناسب للنشاط", visual: "shield" },
+      { id: "shield-2", dialogue: "أنا كنت فاكر إني محتاج وثيقة.", speaker: "hantira", hantira: { expression: "confused" }, faheem: { expression: "happy" } },
+      { id: "shield-3", dialogue: "إنت محتاج برنامج حماية مناسب لنشاطك.", speaker: "faheem", faheem: { expression: "proud" } }
     ]
   },
   {
     id: "six-months",
     title: "Six Months Later",
     beats: [
-      { id: "later", headline: "Six months later...", visual: "quiet-warehouse" },
-      { id: "alarm", headline: "Alarm.", visual: "stylized-fire", effects: ["alarm"], hantira: { expression: "shocked", animation: "panic" } },
-      { id: "call", dialogue: "فهيم!!!", hantira: { expression: "worried" } }
+      { id: "later", kicker: "Six months later...", headline: "كل حاجة ماشية تمام.", visual: "quiet-warehouse" },
+      { id: "alarm", headline: "Alarm.", visual: "stylized-fire", effects: ["alarm", "shake"], hantira: { expression: "shocked", animation: "panic" } },
+      { id: "call", headline: "فهيم!!!", hantira: { expression: "worried", animation: "panic" } }
     ]
   },
   {
@@ -231,38 +242,41 @@ export const scenes: Scene[] = [
       explanation: "الإجراء الدقيق يعتمد على نوع الخسارة ونص الوثيقة، لكن البداية الصحيحة غالبًا هي الإبلاغ واتباع الإجراءات والمستندات المطلوبة.",
       nameVisualization: true
     },
-    beats: [{ id: "ask", headline: "Claim Challenge", visual: "claim-form", hantira: { expression: "worried" } }]
+    beats: [{ id: "ask", headline: "حصل Claim... تعمل إيه الأول؟", visual: "claim-form", hantira: { expression: "worried" } }]
   },
   {
     id: "claims-journey",
     title: "Claims Journey",
     beats: [
-      { id: "journey", headline: "Incident → Notification → Documentation → Survey / Assessment", visual: "claim-journey", faheem: { expression: "neutral", animation: "point" } },
-      { id: "settlement", headline: "Insurer Review → Settlement according to policy", dialogue: "دوري مش بينتهي لما الوثيقة تتصدر.", faheem: { expression: "happy" } }
+      { id: "journey", headline: "رحلة الـ Claim", visual: "claim-journey", faheem: { expression: "neutral", animation: "point" } },
+      { id: "settlement", headline: "التسوية طبقًا للوثيقة", visual: "claim-journey-2" },
+      { id: "role", dialogue: "دوري مش بينتهي لما الوثيقة تتصدر.", speaker: "faheem", faheem: { expression: "proud" } }
     ]
   },
   {
     id: "claims-chaos",
     title: "Claims Chaos",
     beats: [
-      { id: "chaos", headline: "Calls • Emails • Insurer • Surveyor • Invoices • Claim Forms • Documents", visual: "claims-chaos", hantira: { expression: "shocked", animation: "panic" } },
-      { id: "organized", headline: "One Point of Coordination", body: "فهيم بينظم التواصل، لكنه لا يلغي دور شركة التأمين أو المعاين أو مسؤوليات العميل.", visual: "organized-lines", faheem: { expression: "proud" } }
+      { id: "chaos", headline: "بدون تنسيق...", visual: "claims-chaos", hantira: { expression: "shocked", animation: "panic" } },
+      { id: "organized", headline: "One Point of Coordination", visual: "organized-lines", body: "فهيم بينظم التواصل — لكنه لا يلغي دور شركة التأمين أو المعاين أو مسؤوليات العميل.", faheem: { expression: "proud" } }
     ]
   },
   {
     id: "insurance-value",
     title: "Insurance Value",
     beats: [
-      { id: "before", headline: "You buy insurance before the problem.", visual: "quiet" },
-      { id: "after", headline: "But you understand its value after the problem.", body: "بتشتري التأمين قبل الخطر... لكن غالبًا بتحس بقيمته وقت الخسارة.", hantira: { expression: "relieved" } }
+      { id: "before", kicker: "قبل الخطر", headline: "You buy insurance before the problem.", visual: "quiet" },
+      { id: "after", kicker: "وقت الخسارة", headline: "But you understand its value after the problem.", body: "بتشتري التأمين قبل الخطر...\nلكن غالبًا بتحس بقيمته وقت الخسارة.", hantira: { expression: "relieved" } }
     ]
   },
   {
     id: "broker-value",
     title: "What Does The Broker Really Add?",
     beats: [
-      { id: "remove", headline: "Price? Policy? Paperwork?", visual: "remove-words", faheem: { expression: "suspicious" } },
-      { id: "reveal", headline: "Advice • Comparison • Negotiation • Coordination • Support", dialogue: "الوسيط مش مجرد ناقل وثيقة. قيمته في الخبرة والمقارنة والتفاوض والمتابعة.", faheem: { expression: "proud" } }
+      { id: "remove", headline: "إيه اللي مش هو؟", visual: "remove-words", faheem: { expression: "suspicious" } },
+      { id: "reveal", headline: "القيمة الحقيقية", visual: "broker-value" },
+      { id: "role", dialogue: "الوسيط مش مجرد ناقل وثيقة.", speaker: "faheem", faheem: { expression: "suspicious" } },
+      { id: "role-2", dialogue: "قيمته في الخبرة والمقارنة والتفاوض والمتابعة.", speaker: "faheem", faheem: { expression: "proud" } }
     ]
   },
   {
@@ -297,7 +311,7 @@ export const scenes: Scene[] = [
     id: "our-company",
     title: "What Our Company Does",
     beats: [
-      { id: "config", headline: "What do we do?", body: "Understand Your Business → Identify Risks → Search the Insurance Market → Compare & Negotiate → Arrange Coverage → Manage Policies → Support Claims → Renew & Improve", visual: "company-flow", faheem: { expression: "proud" } }
+      { id: "config", headline: "What do we do?", visual: "company-flow", faheem: { expression: "proud", animation: "point" } }
     ]
   },
   {
@@ -305,8 +319,9 @@ export const scenes: Scene[] = [
     title: "Final Hantira",
     beats: [
       { id: "protected", headline: "حنتيرة رجع لنفس الشركة... بس المرة دي محمية.", visual: "protected-business", hantira: { expression: "relieved" }, faheem: { expression: "happy" } },
-      { id: "learned", dialogue: "أنا كنت فاكر التأمين مصروف. دلوقتي فهمت إنه وسيلة أحمي بيها اللي بنيته.", hantira: { expression: "proud" } },
-      { id: "goal", dialogue: "فهيم: وده هو الهدف.", faheem: { expression: "happy" } }
+      { id: "learned", dialogue: "أنا كنت فاكر التأمين مصروف.", speaker: "hantira", hantira: { expression: "thinking" }, faheem: { expression: "neutral" } },
+      { id: "learned-2", dialogue: "دلوقتي فهمت إنه وسيلة أحمي بيها اللي بنيته.", speaker: "hantira", hantira: { expression: "proud" } },
+      { id: "goal", dialogue: "وده هو الهدف.", speaker: "faheem", faheem: { expression: "happy" } }
     ]
   },
   {
@@ -314,10 +329,11 @@ export const scenes: Scene[] = [
     title: "Ending",
     kind: "ending",
     beats: [
-      { id: "question", headline: "طب لو بكرة حصل حاجة؟", visual: "dark-center", hantira: { expression: "thinking" } },
-      { id: "prepare", headline: "You can't predict every risk.", body: "But you can prepare for it.", visual: "logo" },
-      { id: "tagline", headline: "Your Risk. Our Expertise. Better Protection.", visual: "logo" },
-      { id: "joke", headline: "بس سؤال أخير...", body: "الـ Premium ينفع يتقسط؟", visual: "peek", hantira: { expression: "confused", animation: "look-right" } }
+      { id: "question", headline: "طب لو بكرة حصل حاجة؟", visual: "dark-center", mood: "dark", hantira: { expression: "thinking" } },
+      { id: "prepare", headline: "You can't predict every risk.", body: "But you can prepare for it.", visual: "dark-center", mood: "dark", hantira: { expression: "proud" } },
+      { id: "tagline", headline: "", visual: "logo", mood: "dark" },
+      { id: "peek", headline: "بس سؤال أخير...", visual: "peek", mood: "dark" },
+      { id: "joke", headline: "", visual: "peek", mood: "dark", dialogue: "الـ Premium ينفع يتقسط؟", speaker: "hantira" }
     ]
   }
 ];
