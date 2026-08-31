@@ -38,6 +38,8 @@ Never add a service-role key to the frontend.
 
 Rooms are readable by anonymous and authenticated clients so audience screens can follow state. Only authenticated users listed in `public.presenters` can create/update rooms they own. Audience participants use Supabase anonymous auth, can update only their own participant row, and can vote only while the current room has voting open for the active interaction. Audience users may delete their own current vote rows only while voting is still open, which supports questions where answer changes are allowed. Presenters can reset votes only for rooms they own.
 
+Presenter-only policies also check the JWT `is_anonymous` claim so anonymous audience sessions cannot control rooms. Supabase's security advisor may still warn that `participants` allows anonymous Auth users; that is intentional for the phone audience join/reconnect flow. Enable leaked password protection in Auth settings for the presenter account if the project is used live.
+
 ## Security Assumptions
 
 Presenter access depends on Supabase Auth, the `public.presenters` allow-list, and RLS, not a shipped frontend password. Audience identity is lightweight and suitable for live presentation participation, not legal identity.

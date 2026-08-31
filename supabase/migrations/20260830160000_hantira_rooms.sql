@@ -89,7 +89,10 @@ drop policy if exists "presenters can read their own presenter grant" on public.
 create policy "presenters can read their own presenter grant"
 on public.presenters for select
 to authenticated
-using (user_id = (select auth.uid()));
+using (
+  coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false
+  and user_id = (select auth.uid())
+);
 
 drop policy if exists "rooms are readable by anon" on public.rooms;
 create policy "rooms are readable by anon"
@@ -102,6 +105,8 @@ create policy "authenticated presenters create rooms"
 on public.rooms for insert
 to authenticated
 with check (
+  coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false
+  and
   presenter_user_id = (select auth.uid())
   and exists (
     select 1 from public.presenters
@@ -114,6 +119,8 @@ create policy "presenters update own rooms"
 on public.rooms for update
 to authenticated
 using (
+  coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false
+  and
   presenter_user_id = (select auth.uid())
   and exists (
     select 1 from public.presenters
@@ -121,6 +128,8 @@ using (
   )
 )
 with check (
+  coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false
+  and
   presenter_user_id = (select auth.uid())
   and exists (
     select 1 from public.presenters
@@ -229,6 +238,7 @@ using (
   or exists (
     select 1 from public.rooms
     where rooms.id = votes.room_id
+      and coalesce(((select auth.jwt()) ->> 'is_anonymous')::boolean, false) = false
       and rooms.presenter_user_id = (select auth.uid())
       and exists (
         select 1 from public.presenters
