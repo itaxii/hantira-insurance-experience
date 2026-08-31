@@ -153,9 +153,10 @@ describe("story completeness", () => {
 
   it("adds the small creator credit after the post-credit joke", () => {
     const scene = scenes.find((item) => item.id === "ending");
+    const beats = scene?.beats ?? [];
 
-    expect(scene?.beats.at(-2)?.id).toBe("joke");
-    expect(scene?.beats.at(-1)).toMatchObject({ id: "creator-credit", visual: "creator-credit", mood: "dark" });
+    expect(beats[beats.length - 2]?.id).toBe("joke");
+    expect(beats[beats.length - 1]).toMatchObject({ id: "creator-credit", visual: "creator-credit", mood: "dark" });
   });
 });
 
