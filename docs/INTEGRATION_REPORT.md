@@ -113,8 +113,20 @@ Manual limitation:
 
 ## Deployment Status
 
-Pending at the time this report section was written:
-- Push integration branch.
-- Merge verified result to `main`.
-- Wait for GitHub Pages workflow.
-- Verify deployed `/present`, `/control`, `/join/:roomCode` routing.
+Completed:
+- Integration branch pushed: `codex/integrate-glm-repair`.
+- `main` fast-forwarded from `d420e22` to `0683d12`.
+- GitHub Pages workflow: `33375993603`.
+- Workflow status: success.
+- Workflow head SHA: `0683d12c8e6c4b99f800f19eb7dcdd4c429aeda8`.
+- Root URL returned HTTP 200: `https://itaxii.github.io/hantira-insurance-experience/`.
+- Direct deep links return the expected GitHub Pages `404.html` SPA redirect shim:
+  - `/present`: HTTP 404 shim with `sessionStorage.redirect`.
+  - `/control`: HTTP 404 shim with `sessionStorage.redirect`.
+  - `/join/7284`: HTTP 404 shim with `sessionStorage.redirect`.
+- `index.html` restores the saved deep link with `history.replaceState`, so browser refresh/deep-link routing is preserved for the SPA.
+- Deployed bundle check:
+  - Current index asset: `assets/index-eoCeIYo3.js`.
+  - Contains active-room persistence key.
+  - Contains Supabase project URL.
+  - Does not contain the removed `LineAssets` symbol.

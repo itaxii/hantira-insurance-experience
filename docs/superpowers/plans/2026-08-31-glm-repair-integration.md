@@ -118,12 +118,12 @@ npm run build
 
 Verify anonymous join, duplicate nicknames, vote insert, duplicate-vote prevention, vote-name relation, and realtime participant insert delivery.
 
-- [ ] **Step 3: Push verified integration**
+- [x] **Step 3: Push verified integration**
 
 ```bash
 git push origin codex/integrate-glm-repair
 ```
 
-- [ ] **Step 4: Merge or fast-forward to main only after verification**
+- [x] **Step 4: Merge or fast-forward to main only after verification**
 
 Use a normal merge/fast-forward path; do not force-push.
