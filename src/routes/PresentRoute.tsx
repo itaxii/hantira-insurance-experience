@@ -11,9 +11,11 @@ import { getActiveBeat, getActiveScene, moveBeat } from "../lib/story";
 import { applyPosition } from "../lib/roomState";
 import { useExperienceStore } from "../lib/experienceStore";
 import { joinUrl } from "../lib/routing";
+import { useActiveRoomCode } from "../lib/activeRoom";
 
 export function PresentRoute() {
-  const store = useExperienceStore();
+  const [roomCode] = useActiveRoomCode();
+  const store = useExperienceStore(roomCode);
   const [started, setStarted] = useState(false);
   const position = { sceneIndex: store.room.current_scene, beatIndex: store.room.current_beat };
   const scene = getActiveScene(scenes, position);

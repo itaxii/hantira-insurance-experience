@@ -9,9 +9,11 @@ import { moveBeat } from "../lib/story";
 import { appHref, joinUrl } from "../lib/routing";
 import { hasSupabaseConfig, supabase } from "../lib/supabaseClient";
 import { isPresenterSessionAllowed, presenterSecurityNote } from "../lib/presenterAuth";
+import { useActiveRoomCode } from "../lib/activeRoom";
 
 export function ControlRoute() {
-  const store = useExperienceStore();
+  const [roomCode, setRoomCode] = useActiveRoomCode();
+  const store = useExperienceStore(roomCode);
   const [query, setQuery] = useState("");
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
@@ -21,6 +23,7 @@ export function ControlRoute() {
   const interaction = scene?.interaction;
   const filtered = store.participants.filter((participant) => participant.display_name.toLowerCase().includes(query.toLowerCase()));
   const currentJoinUrl = useMemo(() => joinUrl(window.location.origin, store.room.code), [store.room.code]);
+  const currentPresentUrl = useMemo(() => `${appHref("/present")}?room=${encodeURIComponent(store.room.code)}`, [store.room.code]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -83,6 +86,12 @@ export function ControlRoute() {
     store.updateRoom(applyPosition(store.room, next, nextScene.interaction?.id ?? null));
   };
 
+  const createRoom = () => {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    setRoomCode(code);
+    store.createRoom(code);
+  };
+
   return (
     <main className="control">
       <header>
@@ -92,7 +101,7 @@ export function ControlRoute() {
         </div>
         <div className="button-row">
           {hasSupabaseConfig ? <button onClick={logout}>Logout</button> : null}
-          <a href={appHref("/present")} target="_blank">Open /present</a>
+          <a href={currentPresentUrl} target="_blank">Open /present</a>
         </div>
       </header>
       <section className="control-grid">
@@ -100,8 +109,9 @@ export function ControlRoute() {
           <h2>Room</h2>
           <p className="room-code">Room: {store.room.code}</p>
           <p>{currentJoinUrl}</p>
+          {store.error ? <p className="error">{store.error === "presenter_auth_required" ? "Presenter login is required before creating rooms." : store.error}</p> : null}
           <button onClick={() => navigator.clipboard?.writeText(currentJoinUrl)}><Copy size={18} /> Copy Join Link</button>
-          <button onClick={() => store.createRoom(String(Math.floor(1000 + Math.random() * 9000)))}>Create Room</button>
+          <button onClick={createRoom}>Create Room</button>
           <button onClick={() => store.updateRoom({ status: "join", current_scene: 1, current_beat: 0, joins_allowed: true })}>Show Join Screen</button>
           <button onClick={() => store.updateRoom({ status: "live", current_scene: 2, current_beat: 0, joins_allowed: false })}>ابدأ الرحلة</button>
           <button onClick={() => store.updateRoom({ joins_allowed: !store.room.joins_allowed })}><Lock size={18} /> {store.room.joins_allowed ? "Lock Late Joins" : "Allow Late Joins"}</button>
