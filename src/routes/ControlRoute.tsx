@@ -1,25 +1,87 @@
 import { Copy, Eye, EyeOff, Lock, RotateCcw, Search, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import type { FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { scenes } from "../data/scenes";
 import { useExperienceStore } from "../lib/experienceStore";
 import { applyPosition, makeRoom } from "../lib/roomState";
 import { moveBeat } from "../lib/story";
 import { appHref, joinUrl } from "../lib/routing";
+import { hasSupabaseConfig, supabase } from "../lib/supabaseClient";
+import { isPresenterSessionAllowed, presenterSecurityNote } from "../lib/presenterAuth";
 
 export function ControlRoute() {
   const store = useExperienceStore();
   const [query, setQuery] = useState("");
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
   const scene = scenes[store.room.current_scene];
   const interaction = scene?.interaction;
   const filtered = store.participants.filter((participant) => participant.display_name.toLowerCase().includes(query.toLowerCase()));
+  const currentJoinUrl = useMemo(() => joinUrl(window.location.origin, store.room.code), [store.room.code]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data }) => setAuthUser(data.user));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setAuthUser(session?.user ?? null));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  const login = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!supabase) return;
+    setAuthError(null);
+    const result = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (result.error) {
+      setAuthError(result.error.message);
+      return;
+    }
+    setAuthUser(result.data.user);
+  };
+
+  const logout = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    setAuthUser(null);
+  };
+
+  if (hasSupabaseConfig && !isPresenterSessionAllowed(authUser)) {
+    return (
+      <main className="control control-auth">
+        <section className="control-panel auth-panel">
+          <p className="eyebrow">Presenter Control</p>
+          <h1>دخول مقدم العرض</h1>
+          <p className="privacy">{presenterSecurityNote()}</p>
+          <form className="auth-form" onSubmit={login}>
+            <label>
+              Email
+              <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" required />
+            </label>
+            <label>
+              Password
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                type="password"
+                autoComplete="current-password"
+                required
+              />
+            </label>
+            {authError ? <p className="error">{authError}</p> : null}
+            <button className="primary" type="submit"><Lock size={18} /> Login</button>
+          </form>
+        </section>
+      </main>
+    );
+  }
 
   const go = (direction: "next" | "previous") => {
     const next = moveBeat(scenes, { sceneIndex: store.room.current_scene, beatIndex: store.room.current_beat }, direction);
     const nextScene = scenes[next.sceneIndex];
     store.updateRoom(applyPosition(store.room, next, nextScene.interaction?.id ?? null));
   };
-
-  const currentJoinUrl = useMemo(() => joinUrl(window.location.origin, store.room.code), [store.room.code]);
 
   return (
     <main className="control">
@@ -28,7 +90,10 @@ export function ControlRoute() {
           <p className="eyebrow">Presenter Control</p>
           <h1>حنتيرة في عالم التأمين</h1>
         </div>
-        <a href={appHref("/present")} target="_blank">Open /present</a>
+        <div className="button-row">
+          {hasSupabaseConfig ? <button onClick={logout}>Logout</button> : null}
+          <a href={appHref("/present")} target="_blank">Open /present</a>
+        </div>
       </header>
       <section className="control-grid">
         <div className="control-panel">

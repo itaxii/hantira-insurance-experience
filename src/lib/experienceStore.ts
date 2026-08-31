@@ -5,6 +5,7 @@ import { makeRoom } from "./roomState";
 import { hasSupabaseConfig, supabase } from "./supabaseClient";
 import { useLocalRoom } from "./localStore";
 import { ensureAnonymousAuth } from "./supabaseAuth";
+import { isPresenterSessionAllowed } from "./presenterAuth";
 
 export function useExperienceStore(roomCode = appConfig.room.defaultCode) {
   const local = useLocalRoom();
@@ -66,6 +67,10 @@ export function useExperienceStore(roomCode = appConfig.room.defaultCode) {
     if (!supabase) return local.updateRoom(makeRoom(code));
     const client = supabase;
     const user = await client.auth.getUser();
+    if (!isPresenterSessionAllowed(user.data.user)) {
+      setError("presenter_auth_required");
+      return;
+    }
     const next = makeRoom(code);
     const result = await client
       .from("rooms")

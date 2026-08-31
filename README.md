@@ -34,7 +34,7 @@ Do not put service-role keys, private credentials, or presenter passwords in fro
 
 ## Supabase
 
-Enable Supabase Anonymous Sign-Ins, then run `supabase/migrations/20260830160000_hantira_rooms.sql` in Supabase. See `docs/SUPABASE.md` for schema, RLS, realtime, and security notes.
+Enable Supabase Anonymous Sign-Ins, run `supabase/migrations/20260830160000_hantira_rooms.sql`, create a Supabase Auth presenter account, and insert that user's id into `public.presenters`. See `docs/SUPABASE.md` for schema, RLS, realtime, and security notes.
 
 ## Presentation Flow
 
@@ -51,4 +51,4 @@ npm run build
 
 ## Deployment
 
-The included GitHub Actions workflow builds and deploys the static app to GitHub Pages. SPA refresh support is handled by copying `index.html` to `404.html` in the deploy workflow.
+The included GitHub Actions workflow builds and deploys the static app to GitHub Pages. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as GitHub repository variables or secrets before the deployment build. SPA refresh support is handled by copying `index.html` to `404.html` in the deploy workflow.

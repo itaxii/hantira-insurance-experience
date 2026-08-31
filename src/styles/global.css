@@ -428,6 +428,27 @@ input, select {
   color: var(--muted);
 }
 
+.control-auth {
+  display: grid;
+  place-items: center;
+}
+
+.auth-panel {
+  width: min(520px, 100%);
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: .45rem;
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .shake { animation: shake 420ms linear; }
 
 @keyframes shake {

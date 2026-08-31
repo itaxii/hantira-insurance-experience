@@ -18,6 +18,11 @@ create table if not exists public.rooms (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.presenters (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.participants (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references public.rooms(id) on delete cascade,
@@ -41,6 +46,7 @@ create table if not exists public.votes (
 );
 
 create index if not exists rooms_code_idx on public.rooms(code);
+create index if not exists rooms_presenter_user_id_idx on public.rooms(presenter_user_id);
 create index if not exists participants_room_idx on public.participants(room_id);
 create index if not exists participants_auth_user_idx on public.participants(auth_user_id);
 create index if not exists participants_last_seen_idx on public.participants(room_id, last_seen_at desc);
@@ -50,6 +56,7 @@ create index if not exists votes_participant_idx on public.votes(room_id, partic
 create or replace function public.touch_updated_at()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
   new.updated_at = now();
@@ -63,17 +70,26 @@ before update on public.rooms
 for each row execute function public.touch_updated_at();
 
 alter table public.rooms enable row level security;
+alter table public.presenters enable row level security;
 alter table public.participants enable row level security;
 alter table public.votes enable row level security;
 
 revoke all on public.rooms from anon, authenticated;
+revoke all on public.presenters from anon, authenticated;
 revoke all on public.participants from anon, authenticated;
 revoke all on public.votes from anon, authenticated;
 
 grant select on public.rooms to anon, authenticated;
+grant select on public.presenters to authenticated;
 grant select, insert, update on public.participants to authenticated;
 grant select, insert, delete on public.votes to authenticated;
 grant select, insert, update, delete on public.rooms to authenticated;
+
+drop policy if exists "presenters can read their own presenter grant" on public.presenters;
+create policy "presenters can read their own presenter grant"
+on public.presenters for select
+to authenticated
+using (user_id = (select auth.uid()));
 
 drop policy if exists "rooms are readable by anon" on public.rooms;
 create policy "rooms are readable by anon"
@@ -85,14 +101,32 @@ drop policy if exists "authenticated presenters create rooms" on public.rooms;
 create policy "authenticated presenters create rooms"
 on public.rooms for insert
 to authenticated
-with check (presenter_user_id = auth.uid());
+with check (
+  presenter_user_id = (select auth.uid())
+  and exists (
+    select 1 from public.presenters
+    where presenters.user_id = (select auth.uid())
+  )
+);
 
 drop policy if exists "presenters update own rooms" on public.rooms;
 create policy "presenters update own rooms"
 on public.rooms for update
 to authenticated
-using (presenter_user_id = auth.uid())
-with check (presenter_user_id = auth.uid());
+using (
+  presenter_user_id = (select auth.uid())
+  and exists (
+    select 1 from public.presenters
+    where presenters.user_id = (select auth.uid())
+  )
+)
+with check (
+  presenter_user_id = (select auth.uid())
+  and exists (
+    select 1 from public.presenters
+    where presenters.user_id = (select auth.uid())
+  )
+);
 
 drop policy if exists "participants readable for room experience" on public.participants;
 create policy "participants readable for room experience"
@@ -105,8 +139,8 @@ create policy "anon can join open rooms"
 on public.participants for insert
 to authenticated
 with check (
-  auth.uid() is not null
-  and auth_user_id = auth.uid()
+  (select auth.uid()) is not null
+  and auth_user_id = (select auth.uid())
   and
   exists (
     select 1 from public.rooms
@@ -121,8 +155,8 @@ create policy "participants can refresh their session row"
 on public.participants for update
 to authenticated
 using (
-  auth.uid() is not null
-  and auth_user_id = auth.uid()
+  (select auth.uid()) is not null
+  and auth_user_id = (select auth.uid())
   and
   exists (
     select 1 from public.rooms
@@ -131,8 +165,8 @@ using (
   )
 )
 with check (
-  auth.uid() is not null
-  and auth_user_id = auth.uid()
+  (select auth.uid()) is not null
+  and auth_user_id = (select auth.uid())
   and
   exists (
     select 1 from public.rooms
@@ -152,12 +186,12 @@ create policy "anon can vote only while voting is open"
 on public.votes for insert
 to authenticated
 with check (
-  auth.uid() is not null
+  (select auth.uid()) is not null
   and exists (
     select 1 from public.participants
     where participants.room_id = votes.room_id
       and participants.session_id = votes.participant_session_id
-      and participants.auth_user_id = auth.uid()
+      and participants.auth_user_id = (select auth.uid())
   )
   and
   exists (
@@ -169,18 +203,60 @@ with check (
   )
 );
 
+drop policy if exists "participants can change own vote while voting is open" on public.votes;
 drop policy if exists "presenters can reset room votes" on public.votes;
-create policy "presenters can reset room votes"
+drop policy if exists "participants can change own vote or presenters can reset" on public.votes;
+create policy "participants can change own vote or presenters can reset"
 on public.votes for delete
 to authenticated
 using (
-  exists (
+  (
+    (select auth.uid()) is not null
+    and exists (
+      select 1 from public.participants
+      where participants.room_id = votes.room_id
+        and participants.session_id = votes.participant_session_id
+        and participants.auth_user_id = (select auth.uid())
+    )
+    and exists (
+      select 1 from public.rooms
+      where rooms.id = votes.room_id
+        and rooms.voting_open = true
+        and rooms.active_interaction = votes.question_id
+        and rooms.status = 'live'
+    )
+  )
+  or exists (
     select 1 from public.rooms
     where rooms.id = votes.room_id
-      and rooms.presenter_user_id = auth.uid()
+      and rooms.presenter_user_id = (select auth.uid())
+      and exists (
+        select 1 from public.presenters
+        where presenters.user_id = (select auth.uid())
+      )
   )
 );
 
-alter publication supabase_realtime add table public.rooms;
-alter publication supabase_realtime add table public.participants;
-alter publication supabase_realtime add table public.votes;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'rooms'
+  ) then
+    alter publication supabase_realtime add table public.rooms;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'participants'
+  ) then
+    alter publication supabase_realtime add table public.participants;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'votes'
+  ) then
+    alter publication supabase_realtime add table public.votes;
+  end if;
+end $$;

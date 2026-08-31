@@ -1,11 +1,12 @@
-export function isPresenterSecretStrong(secret: string | undefined) {
-  return Boolean(secret && secret.length >= 12);
-}
+type PresenterLikeUser = {
+  id?: string;
+  is_anonymous?: boolean;
+} | null | undefined;
 
-export function verifyPresenterSecret(expected: string | undefined, provided: string) {
-  return isPresenterSecretStrong(expected) && expected === provided;
+export function isPresenterSessionAllowed(user: PresenterLikeUser) {
+  return Boolean(user?.id && user.is_anonymous !== true);
 }
 
 export function presenterSecurityNote() {
-  return "Production presenter access uses Supabase Auth and RLS. Do not ship presenter passwords in VITE variables.";
+  return "Production presenter access uses Supabase Auth plus the public.presenters allow-list table. Do not ship presenter passwords in VITE variables.";
 }
