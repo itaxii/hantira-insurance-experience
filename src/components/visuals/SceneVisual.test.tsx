@@ -13,7 +13,7 @@ describe("SceneVisual registry", () => {
       const { container, unmount } = render(<SceneVisual id={id} />);
       const hasArt =
         container.querySelector("svg") !== null ||
-        container.querySelector("article, ol, .term-cloud, .offer-storm, .logo-badge, .broker-slider, .value-words, .company-flow") !== null;
+        container.querySelector("article, ol, .term-cloud, .offer-storm, .logo-badge, .broker-slider, .value-words, .broker-value-setup, .company-flow, .contact-logo-transparent, .creator-credit") !== null;
       expect(hasArt, `visual "${id}" rendered empty`).toBe(true);
       unmount();
     }

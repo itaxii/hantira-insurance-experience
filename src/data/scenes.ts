@@ -43,8 +43,9 @@ export const scenes: Scene[] = [
       explanation: "دي بداية تفكير حنتيرة. هنشوف بعد شوية هل توفير الـ Premium دايمًا قرار ذكي؟",
       nameVisualization: true
     },
+    interactionBeatIds: ["ask"],
     beats: [
-      { id: "ask", headline: "حنتيرة عنده حق؟", hantira: { expression: "suspicious", animation: "point" } },
+      { id: "ask", hantira: { expression: "suspicious", animation: "point" } },
       { id: "reaction", headline: "حنتيرة سامع آراءكم... وبيحسبها تاني.", hantira: { expression: "thinking", animation: "think" } }
     ]
   },
@@ -145,6 +146,7 @@ export const scenes: Scene[] = [
       explanation: "Cheapest ≠ Best. Most Expensive ≠ Best. Right Fit = Best.",
       nameVisualization: true
     },
+    interactionResultOnlyBeatIds: ["reveal"],
     beats: [
       { id: "ask", headline: "اختار العرض", visual: "three-offers", hantira: { expression: "thinking" } },
       { id: "reveal", headline: "Right Fit = Best", visual: "offer-details", dialogue: "أنا كنت هلبس.", speaker: "hantira", hantira: { expression: "shocked", animation: "facepalm" } }
@@ -208,6 +210,7 @@ export const scenes: Scene[] = [
       nameVisualization: false
     },
     interactionBeatIds: ["vote", "map"],
+    interactionResultOnlyBeatIds: ["map"],
     beats: [
       { id: "setup", headline: "Hantira Logistics", body: "30 Trucks • 1 Warehouse • 120 Employees • International Shipments\nإيه المخاطر اللي شايفينها؟", visual: "logistics", hantira: { expression: "thinking", animation: "think" }, faheem: { expression: "neutral" } },
       { id: "vote", headline: "اختاروا الحماية المناسبة", visual: "protection-vote", faheem: { expression: "neutral", animation: "point" } },
@@ -275,7 +278,7 @@ export const scenes: Scene[] = [
     id: "broker-value",
     title: "What Does The Broker Really Add?",
     beats: [
-      { id: "remove", headline: "إيه اللي مش هو؟", visual: "remove-words", faheem: { expression: "suspicious" } },
+      { id: "remove", kicker: "سؤال مهم", headline: "الوسيط بيضيف إيه غير إنه ينقل الوثيقة؟", body: "مش مجرد سعر أو ورقة بين شركة التأمين والعميل.", visual: "broker-value-setup", faheem: { expression: "suspicious" } },
       { id: "reveal", headline: "القيمة الحقيقية", visual: "broker-value" },
       { id: "role", dialogue: "الوسيط مش مجرد ناقل وثيقة.", speaker: "faheem", faheem: { expression: "suspicious" } },
       { id: "role-2", dialogue: "قيمته في الخبرة والمقارنة والتفاوض والمتابعة.", speaker: "faheem", faheem: { expression: "proud" } }
@@ -313,7 +316,7 @@ export const scenes: Scene[] = [
     id: "contact-reveal",
     title: "Contact Reveal",
     beats: [
-      { id: "reveal", headline: "واللي فهيم كان بيعمله...", body: "ده شغلنا.", visual: "contact-reveal" },
+      { id: "reveal", headline: "واللي فهيم كان بيعمله...", body: "ده شغلنا.", visual: "contact-reveal", mood: "dark" },
       { id: "who-we-are", headline: "About Contact Insurance Brokerage", visual: "contact-stats", body: "موجودين في السوق المصري كوسيط تأمين من 2015، وبنخدم أفراد وشركات." },
       { id: "who-we-serve", headline: "بنخدم مين؟", visual: "contact-serves", body: "Retail و Corporates و SMEs — مع حلول تأمين مناسبة حسب النشاط." },
       { id: "what-we-do", headline: "بنحوّل التعقيد لقرار أوضح", visual: "contact-flow" }
@@ -338,7 +341,8 @@ export const scenes: Scene[] = [
       { id: "prepare", headline: "You can't predict every risk.", body: "But you can prepare for it.", visual: "dark-center", mood: "dark", hantira: { expression: "proud" } },
       { id: "tagline", headline: "", visual: "logo", mood: "dark" },
       { id: "peek", headline: "بس سؤال أخير...", visual: "peek", mood: "dark" },
-      { id: "joke", headline: "", visual: "peek", mood: "dark", dialogue: "الـ Premium ينفع يتقسط؟", speaker: "hantira" }
+      { id: "joke", headline: "", visual: "peek", mood: "dark", dialogue: "الـ Premium ينفع يتقسط؟", speaker: "hantira" },
+      { id: "creator-credit", visual: "creator-credit", mood: "dark" }
     ]
   }
 ];

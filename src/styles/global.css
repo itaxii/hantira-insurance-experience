@@ -415,6 +415,42 @@ input, select {
   margin-inline-end: clamp(7rem, 16vw, 16rem);
 }
 
+.scene-insurance-30.beat-takeaway .stage-visual {
+  min-height: clamp(150px, 22vh, 250px);
+  width: min(1320px, 100%);
+}
+
+.scene-insurance-30.beat-takeaway .characters {
+  inset-inline-start: auto;
+  inset-inline-end: clamp(0.4rem, 2vw, 2rem);
+  bottom: clamp(-1.2rem, -1vh, -0.35rem);
+  width: min(190px, 18vw);
+  justify-content: flex-end;
+}
+
+.scene-ending.beat-question .stage-visual,
+.scene-ending.beat-prepare .stage-visual {
+  min-height: clamp(170px, 24vh, 270px);
+}
+
+.scene-ending.beat-question .characters,
+.scene-ending.beat-prepare .characters {
+  bottom: clamp(-3rem, -3vh, -1.2rem);
+}
+
+.scene-broker-value.beat-remove .stage-visual {
+  width: min(1320px, 100%);
+  min-height: clamp(170px, 24vh, 270px);
+}
+
+.scene-broker-value.beat-remove .characters {
+  inset-inline-start: clamp(0.4rem, 2vw, 2rem);
+  inset-inline-end: auto;
+  bottom: clamp(-1.4rem, -1.5vh, -0.45rem);
+  width: min(185px, 18vw);
+  justify-content: flex-start;
+}
+
 /* QR */
 
 .qr-wrap {
@@ -859,6 +895,53 @@ input, select {
 .value-chip strong { font-size: clamp(1.2rem, 2vw, 2rem); font-weight: 850; }
 .value-chip span { color: var(--accent-ink); font-weight: 750; }
 
+.broker-value-setup {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  width: min(940px, 100%);
+}
+
+.broker-value-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+  flex-wrap: wrap;
+  color: var(--ink);
+}
+
+.broker-value-flow span,
+.broker-value-flow strong {
+  min-width: clamp(120px, 15vw, 190px);
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+  font-size: clamp(1.1rem, 1.6vw, 1.55rem);
+  font-weight: 850;
+  text-align: center;
+}
+
+.broker-value-flow strong {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.broker-value-flow svg {
+  width: clamp(52px, 6vw, 86px);
+  height: auto;
+  color: var(--accent);
+}
+
+.broker-value-question {
+  color: var(--accent-ink);
+  font-weight: 900;
+  font-size: clamp(1.4rem, 2.4vw, 2.8rem);
+  margin: 0;
+}
+
 /* broker slider */
 
 .broker-slider { display: grid; gap: var(--space-2); width: 100%; max-width: 860px; }
@@ -979,6 +1062,50 @@ input, select {
 
 .contact-logo-panel img { width: min(620px, 68vw); display: block; position: relative; z-index: 1; }
 .contact-reveal p { color: var(--accent-ink); font-size: clamp(1.2rem, 2vw, 2rem); font-weight: 850; margin: 0; }
+
+.contact-logo-transparent {
+  display: grid;
+  place-items: center;
+  padding: clamp(0.4rem, 1.4vw, 1rem);
+}
+
+.contact-logo-transparent img {
+  width: min(620px, 68vw);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.28));
+}
+
+.mood-dark .contact-reveal p {
+  color: var(--contact-yellow);
+}
+
+.creator-credit {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  color: var(--paper);
+  text-align: center;
+}
+
+.creator-credit-main,
+.creator-credit-note {
+  margin: 0;
+}
+
+.creator-credit-main {
+  color: var(--contact-yellow);
+  font-size: clamp(1.2rem, 1.8vw, 2rem);
+  font-weight: 850;
+}
+
+.creator-credit-note {
+  color: color-mix(in srgb, var(--paper) 78%, transparent);
+  font-size: clamp(0.95rem, 1.25vw, 1.3rem);
+  line-height: 1.55;
+  font-weight: 650;
+}
 
 .contact-stats {
   display: grid;

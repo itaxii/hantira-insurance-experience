@@ -72,7 +72,8 @@ describe("story completeness", () => {
           (value) => typeof value === "string" && value.trim().length > 0
         );
         const hasRegisteredVisual = typeof beat.visual === "string" && beat.visual !== "qr" && registered.has(beat.visual);
-        expect(hasText || hasRegisteredVisual, `beat ${scene.id}/${beat.id}`).toBe(true);
+        const hasInteractionPrompt = scene.interaction && (!scene.interactionBeatIds?.length || scene.interactionBeatIds.includes(beat.id));
+        expect(hasText || hasRegisteredVisual || hasInteractionPrompt, `beat ${scene.id}/${beat.id}`).toBe(true);
       }
     }
   });
@@ -111,8 +112,19 @@ describe("story completeness", () => {
 
     expect(scene?.beats).toHaveLength(2);
     expect(scene?.beats[0].id).toBe("ask");
+    expect(scene?.beats[0].headline).toBeUndefined();
     expect(scene?.beats[1].id).toBe("reaction");
     expect(scene?.beats[1].headline).not.toBe(scene?.beats[0].headline);
+    expect(scene?.interactionBeatIds).toEqual(["ask"]);
+  });
+
+  it("keeps repeated projector voting UI off reveal-only beats", () => {
+    const brokerChallenge = scenes.find((item) => item.id === "broker-challenge-1");
+    const buildProtection = scenes.find((item) => item.id === "build-protection");
+
+    expect(brokerChallenge?.interactionResultOnlyBeatIds).toEqual(["reveal"]);
+    expect(buildProtection?.interactionBeatIds).toEqual(["vote", "map"]);
+    expect(buildProtection?.interactionResultOnlyBeatIds).toEqual(["map"]);
   });
 
   it("keeps the 350K invoice copy exact and leaves Who Pays to render a single question", () => {
@@ -136,6 +148,14 @@ describe("story completeness", () => {
 
     expect(scene?.title).toContain("Contact");
     expect(scene?.beats.map((beat) => beat.id)).toEqual(["reveal", "who-we-are", "who-we-serve", "what-we-do"]);
+    expect(scene?.beats[0].mood).toBe("dark");
+  });
+
+  it("adds the small creator credit after the post-credit joke", () => {
+    const scene = scenes.find((item) => item.id === "ending");
+
+    expect(scene?.beats.at(-2)?.id).toBe("joke");
+    expect(scene?.beats.at(-1)).toMatchObject({ id: "creator-credit", visual: "creator-credit", mood: "dark" });
   });
 });
 

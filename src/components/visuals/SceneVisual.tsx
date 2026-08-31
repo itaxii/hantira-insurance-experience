@@ -915,7 +915,27 @@ function CoordinationVisual({ mode }: { mode: "chaos" | "organized" }) {
 
 /* ------------------------------ broker value -------------------------------- */
 
-function BrokerValue({ mode }: { mode: "remove" | "value" }) {
+function BrokerValue({ mode }: { mode: "setup" | "remove" | "value" }) {
+  if (mode === "setup") {
+    return (
+      <div className="broker-value-setup" dir="rtl">
+        <div className="broker-value-flow rise">
+          <span>شركة التأمين</span>
+          <svg viewBox="-48 -18 96 36" aria-hidden="true">
+            <ArrowLeft length={72} />
+          </svg>
+          <strong>وثيقة</strong>
+          <svg viewBox="-48 -18 96 36" aria-hidden="true">
+            <ArrowLeft length={72} />
+          </svg>
+          <span>العميل</span>
+        </div>
+        <p className="broker-value-question pop" style={delay(2, 180)}>
+          طب فين قيمة الوسيط هنا؟
+        </p>
+      </div>
+    );
+  }
   if (mode === "remove") {
     return (
       <div className="value-words">
@@ -992,10 +1012,22 @@ function LogoBadge() {
 function ContactReveal() {
   return (
     <div className="contact-reveal">
-      <article className="contact-logo-panel rise">
+      <div className="contact-logo-transparent rise">
         <img src={publicAsset(appConfig.company.logoPath)} alt={appConfig.company.name} />
-      </article>
+      </div>
       <p dir="ltr">{appConfig.company.tagline}</p>
+    </div>
+  );
+}
+
+function CreatorCredit() {
+  return (
+    <div className="creator-credit" dir="ltr">
+      <p className="creator-credit-main rise">Made by Mohamed Tolba — Data Analyst</p>
+      <p className="creator-credit-note rise" style={delay(1, 520)}>
+        Not really in my usual scope.<br />
+        They gave me the task anyway 🚶🚶.
+      </p>
     </div>
   );
 }
@@ -1264,6 +1296,7 @@ const registry: Record<string, () => React.ReactElement> = {
   "organized-lines": () => <CoordinationVisual mode="organized" />,
   quiet: QuietScene,
   "remove-words": () => <BrokerValue mode="remove" />,
+  "broker-value-setup": () => <BrokerValue mode="setup" />,
   "broker-value": () => <BrokerValue mode="value" />,
   "broker-slider": BrokerSlider,
   "final-question": BigQuestion,
@@ -1272,7 +1305,8 @@ const registry: Record<string, () => React.ReactElement> = {
   "contact-stats": ContactStats,
   "contact-serves": ContactServes,
   "contact-flow": ContactFlow,
-  peek: PeekHantira
+  peek: PeekHantira,
+  "creator-credit": CreatorCredit
 };
 
 export const sceneVisualIds = Object.keys(registry);

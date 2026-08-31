@@ -67,6 +67,7 @@ export type Scene = {
   beats: Beat[];
   interaction?: InteractionDefinition;
   interactionBeatIds?: string[];
+  interactionResultOnlyBeatIds?: string[];
 };
 
 export type StoryPosition = {

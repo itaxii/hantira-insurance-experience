@@ -22,15 +22,21 @@ const CENTER_VISUALS = new Set([
   "peek",
   "remove-words",
   "broker-value",
+  "broker-value-setup",
   "impact",
   "formula",
   "contact-reveal",
   "contact-stats",
   "contact-serves",
-  "contact-flow"
+  "contact-flow",
+  "creator-credit"
 ]);
 const SPEAKER_LABEL = { hantira: "حنتيرة", faheem: "فهيم" } as const;
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+function classSafe(value: string | undefined) {
+  return value ? value.replace(/[^a-zA-Z0-9_-]/g, "-") : "plain";
+}
 
 const effectCues: Record<string, string> = {
   footsteps: "step",
@@ -117,11 +123,12 @@ export function PresentRoute() {
   const isCenter = !hasVisual || CENTER_VISUALS.has(visual ?? "");
   const moodClass = beat?.mood === "dark" ? " mood-dark" : "";
   const shakeClass = beat?.effects?.includes("shake") ? " shake" : "";
+  const resultOnlyInteraction = Boolean(beat?.id && scene.interactionResultOnlyBeatIds?.includes(beat.id));
   const stageClass = ["stage", isCenter ? "stage--center" : "", scene.kind === "interaction" && hasVisual ? "stage--ask" : ""].filter(Boolean).join(" ");
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className={`presentation visual-${visual ?? "plain"}${moodClass}${shakeClass}`}>
+      <main className={`presentation scene-${classSafe(scene.id)} beat-${classSafe(beat?.id)} visual-${visual ?? "plain"}${moodClass}${shakeClass}`}>
         <div className="top-strip">
           <span>{scene.title}</span>
           <span>{store.participants.length} مشارك</span>
@@ -146,13 +153,15 @@ export function PresentRoute() {
                   <p>{beat.dialogue}</p>
                 </div>
               )}
-              {interaction && (
-                <div className="interaction-panel">
-                  <h2>{interaction.question}</h2>
-                  <p className="vote-status">
-                    {store.room.voting_open ? "التصويت مفتوح — شاركوا من الموبايل" : "التصويت مقفول"} • النتائج تظهر بقرار المقدم
-                  </p>
-                  {!store.room.results_visible && (
+              {interaction && (!resultOnlyInteraction || store.room.results_visible || (store.room.answer_revealed && interaction.explanation)) && (
+                <div className={`interaction-panel${resultOnlyInteraction ? " interaction-panel--result-only" : ""}`}>
+                  {!resultOnlyInteraction && <h2>{interaction.question}</h2>}
+                  {!resultOnlyInteraction && (
+                    <p className="vote-status">
+                      {store.room.voting_open ? "التصويت مفتوح — شاركوا من الموبايل" : "التصويت مقفول"} • النتائج تظهر بقرار المقدم
+                    </p>
+                  )}
+                  {!resultOnlyInteraction && !store.room.results_visible && (
                     <div className={`interaction-options count-${interaction.options.length}`}>
                       {interaction.options.map((option, index) => (
                         <span className="interaction-option" key={option.id}>
