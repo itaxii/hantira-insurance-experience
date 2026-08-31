@@ -32,7 +32,7 @@ const requiredSceneIds = [
   "broker-value",
   "with-without",
   "final-understanding",
-  "our-company",
+  "contact-reveal",
   "final-hantira",
   "ending"
 ];
@@ -98,11 +98,44 @@ describe("story completeness", () => {
     expect(dialogues).toContain("إنت محتاج برنامج حماية مناسب لنشاطك.");
     expect(dialogues).toContain("دوري مش بينتهي لما الوثيقة تتصدر.");
     expect(dialogues).toContain("الـ Premium ينفع يتقسط؟");
+    expect(dialogues).toContain("يا نهار أبيض مين اللي هيدفع الفلوس دي؟");
     expect(headlines).toContain("BAAAAM");
     expect(headlines).toContain("فهيم!!!");
     expect(headlines).toContain("One Point of Coordination");
     expect(headlines).toContain("طب لو بكرة حصل حاجة؟");
     expect(headlines).toContain("You can't predict every risk.");
+  });
+
+  it("keeps audience opinion beats visually distinct instead of duplicating the question", () => {
+    const scene = scenes.find((item) => item.id === "hantira-opinion");
+
+    expect(scene?.beats).toHaveLength(2);
+    expect(scene?.beats[0].id).toBe("ask");
+    expect(scene?.beats[1].id).toBe("reaction");
+    expect(scene?.beats[1].headline).not.toBe(scene?.beats[0].headline);
+  });
+
+  it("keeps the 350K invoice copy exact and leaves Who Pays to render a single question", () => {
+    const invoiceBeat = scenes.find((item) => item.id === "nice-morning")?.beats.find((beat) => beat.id === "invoice");
+    const whoPays = scenes.find((item) => item.id === "who-pays");
+
+    expect(invoiceBeat?.dialogue).toBe("يا نهار أبيض مين اللي هيدفع الفلوس دي؟");
+    expect(whoPays?.beats[0].headline).toBe("350,000 EGP");
+    expect(whoPays?.beats[0].headline).not.toBe(whoPays?.interaction?.question);
+  });
+
+  it("uses the redesigned Build Protection four-step progression", () => {
+    const scene = scenes.find((item) => item.id === "build-protection");
+
+    expect(scene?.beats.map((beat) => beat.id)).toEqual(["setup", "vote", "map", "payoff"]);
+    expect(scene?.beats.map((beat) => beat.visual)).toEqual(["logistics", "protection-vote", "protection-map", "shield"]);
+  });
+
+  it("turns the company section into a four-beat Contact reveal", () => {
+    const scene = scenes.find((item) => item.id === "contact-reveal");
+
+    expect(scene?.title).toContain("Contact");
+    expect(scene?.beats.map((beat) => beat.id)).toEqual(["reveal", "who-we-are", "who-we-serve", "what-we-do"]);
   });
 });
 

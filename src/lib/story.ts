@@ -29,6 +29,12 @@ export function getActiveBeat(scenes: Scene[], position: StoryPosition) {
   return scenes[clean.sceneIndex]?.beats[clean.beatIndex];
 }
 
+export function getBeatInteraction(scene: Scene | undefined, beatId: string | undefined) {
+  if (!scene?.interaction || !beatId) return undefined;
+  if (!scene.interactionBeatIds?.length) return scene.interaction;
+  return scene.interactionBeatIds.includes(beatId) ? scene.interaction : undefined;
+}
+
 export function sceneHasJoinQr(scene: Scene) {
   return scene.kind === "join" && scene.onceOnlyQr === true;
 }

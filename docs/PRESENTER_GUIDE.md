@@ -13,7 +13,8 @@
 11. Reveal results, then reveal the answer/explanation.
 12. Use Sample Names for energy; avoid full names with large groups.
 13. Pause after “أنا كنت هلبس” for audience reaction.
-14. Use late-join lock after the QR scene; reopen join screen only if needed.
-15. End on the final screen, then optionally advance to the Premium joke.
+14. On Build Protection, let the `Hantira Logistics` setup land first, then open voting on `اختاروا الحماية المناسبة`.
+15. Use late-join lock after the QR scene; reopen join screen only if needed.
+16. End on the final screen, then optionally advance to the Premium joke.
 
 Keyboard controls on `/present`: Space/Arrow Right next beat, Arrow Left previous beat, `R` reveal, `V` toggle voting, `F` fullscreen, `M` mute, Escape exits fullscreen.

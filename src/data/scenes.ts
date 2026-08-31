@@ -45,7 +45,7 @@ export const scenes: Scene[] = [
     },
     beats: [
       { id: "ask", headline: "حنتيرة عنده حق؟", hantira: { expression: "suspicious", animation: "point" } },
-      { id: "react", headline: "حنتيرة سامع آراءكم...", hantira: { expression: "thinking", animation: "think" } }
+      { id: "reaction", headline: "حنتيرة سامع آراءكم... وبيحسبها تاني.", hantira: { expression: "thinking", animation: "think" } }
     ]
   },
   {
@@ -55,7 +55,7 @@ export const scenes: Scene[] = [
       { id: "time", kicker: "Monday — 8:30 AM", headline: "صباح الفل... النهارده يوم هادي جدًا.", visual: "sunny-road", hantira: { animation: "idle", expression: "happy" }, effects: ["car-engine"] },
       { id: "drive", headline: "حنتيرة سايق ومطمن.", visual: "driving", effects: ["car-engine"] },
       { id: "crash", headline: "BAAAAM", visual: "crash", hantira: { expression: "shocked", animation: "panic" }, effects: ["crash", "shake"] },
-      { id: "invoice", kicker: "INVOICE", visual: "invoice", dialogue: "هو الرقم ده فيه decimal وأنا مش شايفه؟", speaker: "hantira", hantira: { expression: "shocked", animation: "fall" }, effects: ["invoice-reveal"] }
+      { id: "invoice", kicker: "INVOICE", headline: "350,000 EGP", visual: "invoice", dialogue: "يا نهار أبيض مين اللي هيدفع الفلوس دي؟", speaker: "hantira", hantira: { expression: "shocked", animation: "fall" }, effects: ["invoice-reveal"] }
     ]
   },
   {
@@ -78,7 +78,7 @@ export const scenes: Scene[] = [
       explanation: "التأمين مش معناه إن شركة التأمين تدفع أي حاجة. الدفع يعتمد على التغطية والشروط وحدود الوثيقة.",
       nameVisualization: true
     },
-    beats: [{ id: "ask", headline: "مين هيدفع الـ 350 ألف؟", visual: "invoice", hantira: { expression: "worried", animation: "think" } }]
+    beats: [{ id: "ask", headline: "350,000 EGP", body: "السؤال مش مين عنده فلوس... السؤال التغطية بتقول إيه؟", visual: "invoice", hantira: { expression: "worried", animation: "think" } }]
   },
   {
     id: "what-is-risk",
@@ -101,6 +101,7 @@ export const scenes: Scene[] = [
       {
         id: "takeaway",
         headline: "التأمين بينقل جزء من الخطر المالي للجهة المؤمِّنة مقابل Premium وطبقًا لشروط الوثيقة.",
+        visual: "quiet",
         dialogue: "أنا مش بشتري حادث... أنا بشتري حماية مالية لو حصل خطر مغطى.",
         speaker: "hantira",
         hantira: { expression: "proud" }
@@ -154,7 +155,7 @@ export const scenes: Scene[] = [
     title: "Complexity Explosion",
     beats: [
       { id: "terms", headline: "لغة التأمين...", visual: "term-cloud", hantira: { expression: "worried", animation: "panic" } },
-      { id: "freeze", headline: "Freeze.", body: "لما التفاصيل تكتر، القرار محتاج تنظيم.", visual: "freeze", hantira: { expression: "shocked" } }
+      { id: "freeze", headline: "Freeze.", body: "لما التفاصيل تكتر، القرار محتاج تنظيم.", visual: "term-cloud-tighten", hantira: { expression: "shocked" } }
     ]
   },
   {
@@ -206,11 +207,12 @@ export const scenes: Scene[] = [
       explanation: "كل نشاط له Risk Profile مختلف. الفكرة مش إن كل شركة تحتاج كل تغطية، الفكرة إن البرنامج يتفصل على النشاط.",
       nameVisualization: false
     },
+    interactionBeatIds: ["vote", "map"],
     beats: [
-      { id: "ask", headline: "Build Protection", visual: "shield-build", faheem: { expression: "neutral", animation: "point" } },
-      { id: "shield", headline: "برنامج حماية مناسب للنشاط", visual: "shield" },
-      { id: "shield-2", dialogue: "أنا كنت فاكر إني محتاج وثيقة.", speaker: "hantira", hantira: { expression: "confused" }, faheem: { expression: "happy" } },
-      { id: "shield-3", dialogue: "إنت محتاج برنامج حماية مناسب لنشاطك.", speaker: "faheem", faheem: { expression: "proud" } }
+      { id: "setup", headline: "Hantira Logistics", body: "30 Trucks • 1 Warehouse • 120 Employees • International Shipments\nإيه المخاطر اللي شايفينها؟", visual: "logistics", hantira: { expression: "thinking", animation: "think" }, faheem: { expression: "neutral" } },
+      { id: "vote", headline: "اختاروا الحماية المناسبة", visual: "protection-vote", faheem: { expression: "neutral", animation: "point" } },
+      { id: "map", headline: "كل اختيار بيرسم حماية", visual: "protection-map", faheem: { expression: "proud", animation: "point" } },
+      { id: "payoff", headline: "برنامج حماية مناسب للنشاط", visual: "shield", body: "كل نشاط له Risk Profile مختلف. مش كل شركة تحتاج كل تغطية.", dialogue: "حنتيرة: أنا كنت فاكر إني محتاج وثيقة.\nفهيم: إنت محتاج برنامج حماية مناسب لنشاطك.", speaker: "faheem", hantira: { expression: "confused" }, faheem: { expression: "proud" } }
     ]
   },
   {
@@ -308,10 +310,13 @@ export const scenes: Scene[] = [
     beats: [{ id: "ask", headline: "آخر سؤال", visual: "final-question", hantira: { expression: "thinking" }, faheem: { expression: "happy" } }]
   },
   {
-    id: "our-company",
-    title: "What Our Company Does",
+    id: "contact-reveal",
+    title: "Contact Reveal",
     beats: [
-      { id: "config", headline: "What do we do?", visual: "company-flow", faheem: { expression: "proud", animation: "point" } }
+      { id: "reveal", headline: "واللي فهيم كان بيعمله...", body: "ده شغلنا.", visual: "contact-reveal" },
+      { id: "who-we-are", headline: "About Contact Insurance Brokerage", visual: "contact-stats", body: "موجودين في السوق المصري كوسيط تأمين من 2015، وبنخدم أفراد وشركات." },
+      { id: "who-we-serve", headline: "بنخدم مين؟", visual: "contact-serves", body: "Retail و Corporates و SMEs — مع حلول تأمين مناسبة حسب النشاط." },
+      { id: "what-we-do", headline: "بنحوّل التعقيد لقرار أوضح", visual: "contact-flow" }
     ]
   },
   {

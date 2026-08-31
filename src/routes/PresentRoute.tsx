@@ -7,13 +7,28 @@ import { SceneVisual } from "../components/visuals/SceneVisual";
 import { ResultsView } from "../components/ResultsView";
 import { soundManager } from "../components/SoundManager";
 import { scenes } from "../data/scenes";
-import { getActiveBeat, getActiveScene, moveBeat } from "../lib/story";
+import { getActiveBeat, getActiveScene, getBeatInteraction, moveBeat } from "../lib/story";
 import { applyPosition } from "../lib/roomState";
 import { useExperienceStore } from "../lib/experienceStore";
 import { joinUrl } from "../lib/routing";
 import { useActiveRoomCode } from "../lib/activeRoom";
 
-const CENTER_VISUALS = new Set(["dark", "dark-center", "quiet", "final-question", "logo", "peek", "remove-words", "broker-value", "impact", "formula"]);
+const CENTER_VISUALS = new Set([
+  "dark",
+  "dark-center",
+  "quiet",
+  "final-question",
+  "logo",
+  "peek",
+  "remove-words",
+  "broker-value",
+  "impact",
+  "formula",
+  "contact-reveal",
+  "contact-stats",
+  "contact-serves",
+  "contact-flow"
+]);
 const SPEAKER_LABEL = { hantira: "حنتيرة", faheem: "فهيم" } as const;
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
 
@@ -34,13 +49,14 @@ export function PresentRoute() {
   const position = { sceneIndex: store.room.current_scene, beatIndex: store.room.current_beat };
   const scene = getActiveScene(scenes, position);
   const beat = getActiveBeat(scenes, position);
-  const interaction = scene.interaction;
+  const interaction = getBeatInteraction(scene, beat?.id);
   const roomUrl = joinUrl(window.location.origin, store.room.code);
   const sceneVotes = interaction ? store.votes.filter((vote) => vote.question_id === interaction.id) : [];
 
   const setPosition = (next: typeof position) => {
     const nextScene = getActiveScene(scenes, next);
-    store.updateRoom(applyPosition(store.room, next, nextScene.interaction?.id ?? null));
+    const nextBeat = getActiveBeat(scenes, next);
+    store.updateRoom(applyPosition(store.room, next, getBeatInteraction(nextScene, nextBeat?.id)?.id ?? null));
   };
 
   useEffect(() => {

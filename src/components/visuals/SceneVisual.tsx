@@ -3,7 +3,6 @@ import { appConfig } from "../../config";
 import {
   ArrowLeft,
   CarSide,
-  CheckMark,
   Cloud,
   CrackStar,
   Crate,
@@ -27,6 +26,10 @@ type VisualProps = { id: string };
 
 function delay(index: number, step = 90): React.CSSProperties {
   return { animationDelay: `${index * step}ms` };
+}
+
+function publicAsset(path: string) {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, "")}`;
 }
 
 /* ---------------------------------- opening --------------------------------- */
@@ -453,15 +456,25 @@ function MarketRow() {
 }
 
 const stormDocs = ["عرض سعر", "شروط", "استثناءات", "جداول", "ملاحق", "Premium", "Deductible", "Limits"];
+const stormPositions = [
+  { x: 50, y: 8 },
+  { x: 78, y: 22 },
+  { x: 84, y: 52 },
+  { x: 66, y: 78 },
+  { x: 34, y: 80 },
+  { x: 14, y: 58 },
+  { x: 18, y: 26 },
+  { x: 48, y: 46 }
+];
 
 function OfferStorm() {
   return (
     <div className="offer-storm" aria-hidden="true">
       <span className="storm-core" />
       {stormDocs.map((label, index) => {
-        const angle = (index / stormDocs.length) * 360;
+        const position = stormPositions[index];
         return (
-          <span className="storm-doc pop" key={label} style={{ ...delay(index, 120), "--angle": `${angle}deg` } as React.CSSProperties}>
+          <span className="storm-doc pop" key={label} style={{ ...delay(index, 120), "--x": `${position.x}%`, "--y": `${position.y}%` } as React.CSSProperties}>
             {label}
           </span>
         );
@@ -536,15 +549,28 @@ export function OfferPanels({ detail = false }: { detail?: boolean }) {
 /* ------------------------------- term cloud --------------------------------- */
 
 const terms = ["Premium", "Deductible", "Limits", "Exclusions", "Conditions", "Claims", "Add-ons", "Coverage"];
+const termPositions = [
+  { x: 8, y: 10 },
+  { x: 42, y: 4 },
+  { x: 70, y: 18 },
+  { x: 6, y: 42 },
+  { x: 46, y: 36 },
+  { x: 72, y: 54 },
+  { x: 18, y: 74 },
+  { x: 52, y: 76 }
+];
 
-export function TermCloud({ frozen = false }: { frozen?: boolean }) {
+export function TermCloud({ mode = "chaos" }: { mode?: "chaos" | "tight" | "frozen" }) {
   return (
-    <div className={`term-cloud${frozen ? " term-cloud--frozen" : ""}`} aria-hidden="true">
-      {terms.map((term, index) => (
-        <span key={term} style={{ ...delay(index, 110), "--i": index } as React.CSSProperties}>
-          {term}
-        </span>
-      ))}
+    <div className={`term-cloud term-cloud--${mode}`} aria-hidden="true">
+      {terms.map((term, index) => {
+        const position = termPositions[index];
+        return (
+          <span key={term} style={{ ...delay(index, 110), "--x": `${position.x}%`, "--y": `${position.y}%` } as React.CSSProperties}>
+            {term}
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -654,6 +680,52 @@ function ShieldBuild() {
         </g>
       </svg>
     </div>
+  );
+}
+
+function ProtectionVoteVisual() {
+  return (
+    <div className="protection-vote">
+      {[
+        ["Vehicles", "Motor"],
+        ["Warehouse", "Property"],
+        ["Employees", "Medical"],
+        ["Cargo", "Marine"],
+        ["Business", "Liability"],
+        ["Fire", "Property extension"]
+      ].map(([asset, coverage], index) => (
+        <article className="protection-choice card-quiet rise" style={delay(index, 120)} key={asset}>
+          <span>{asset}</span>
+          <strong>{coverage}</strong>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProtectionMapVisual() {
+  const mappings = [
+    { from: "Vehicles", to: "Motor Fleet", x1: 160, y1: 110, x2: 640, y2: 110 },
+    { from: "Warehouse", to: "Property", x1: 160, y1: 210, x2: 640, y2: 190 },
+    { from: "Employees", to: "Medical", x1: 160, y1: 310, x2: 640, y2: 270 },
+    { from: "Cargo", to: "Marine Cargo", x1: 160, y1: 410, x2: 640, y2: 350 }
+  ];
+  return (
+    <svg viewBox="0 0 820 470" className="scene-art protection-map" aria-hidden="true">
+      {mappings.map((item, index) => (
+        <g key={item.from} className="rise" style={delay(index, 160)}>
+          <rect x={item.x1 - 110} y={item.y1 - 28} width="220" height="56" rx="10" fill="var(--card)" stroke="currentColor" strokeWidth="4" />
+          <text x={item.x1} y={item.y1 + 7} textAnchor="middle" fontSize="20" fontWeight="800" fill="currentColor" stroke="none">{item.from}</text>
+          <path d={`M${item.x1 + 120} ${item.y1} C${item.x1 + 250} ${item.y1} ${item.x2 - 250} ${item.y2} ${item.x2 - 120} ${item.y2}`} fill="none" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" className="draw-in" />
+          <rect x={item.x2 - 120} y={item.y2 - 30} width="240" height="60" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="4" />
+          <text x={item.x2} y={item.y2 + 7} textAnchor="middle" fontSize="20" fontWeight="850" fill="var(--accent-ink)" stroke="none">{item.to}</text>
+        </g>
+      ))}
+      <g transform="translate(410,230)" className="pop" style={delay(5, 160)}>
+        <path d="M0 -70 C36 -56 62 -54 86 -54 C86 20 50 58 0 88 C-50 58 -86 20 -86 -54 C-62 -54 -36 -56 0 -70 Z" fill="var(--card-solid)" stroke="var(--accent)" strokeWidth="6" />
+        <text x="0" y="12" textAnchor="middle" fontSize="18" fontWeight="900" fill="var(--accent-ink)" stroke="none">Risk Profile</text>
+      </g>
+    </svg>
   );
 }
 
@@ -907,10 +979,8 @@ function BigQuestion() {
 function LogoBadge() {
   const { company } = appConfig;
   return (
-    <div className="logo-badge rise">
-      <span className="logo-mark" dir="ltr">
-        {company.logoText}
-      </span>
+    <div className="logo-badge contact-logo-badge rise">
+      <img src={publicAsset(company.logoPath)} alt={company.name} />
       <strong>{company.name}</strong>
       <span className="logo-tagline" dir="ltr">
         {company.tagline}
@@ -919,7 +989,50 @@ function LogoBadge() {
   );
 }
 
-function CompanyFlow() {
+function ContactReveal() {
+  return (
+    <div className="contact-reveal">
+      <article className="contact-logo-panel rise">
+        <img src={publicAsset(appConfig.company.logoPath)} alt={appConfig.company.name} />
+      </article>
+      <p dir="ltr">{appConfig.company.tagline}</p>
+    </div>
+  );
+}
+
+function ContactStats() {
+  return (
+    <div className="contact-stats">
+      {appConfig.company.metrics.map((metric, index) => (
+        <article className="contact-stat rise" style={delay(index, 140)} key={metric.value}>
+          <strong dir="ltr">{metric.value}</strong>
+          <span>{metric.label}</span>
+          <p>{metric.detail}</p>
+        </article>
+      ))}
+      <p className="contact-disclaimer">{appConfig.company.disclaimer}</p>
+    </div>
+  );
+}
+
+function ContactServes() {
+  return (
+    <article className="contact-serves">
+      <div className="contact-audiences">
+        {appConfig.company.audiences.map((audience, index) => (
+          <span className="contact-pill rise" style={delay(index, 110)} key={audience}>{audience}</span>
+        ))}
+      </div>
+      <div className="contact-products">
+        {appConfig.company.retailProducts.map((product, index) => (
+          <span className="contact-product pop" style={delay(index, 95)} key={product}>{product}</span>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function ContactFlow() {
   const steps = [
     "Understand Your Business",
     "Identify Risks",
@@ -931,7 +1044,7 @@ function CompanyFlow() {
     "Renew & Improve"
   ];
   return (
-    <div className="company-flow">
+    <div className="company-flow contact-flow">
       <p className="company-flow-name">
         {appConfig.company.name} — <span dir="ltr">{appConfig.company.tagline}</span>
       </p>
@@ -1132,12 +1245,15 @@ const registry: Record<string, () => React.ReactElement> = {
   "three-offers": () => <OfferPanels />,
   "offer-details": () => <OfferPanels detail />,
   "term-cloud": () => <TermCloud />,
-  freeze: () => <TermCloud frozen />,
+  "term-cloud-tighten": () => <TermCloud mode="tight" />,
+  freeze: () => <TermCloud mode="frozen" />,
   "faheem-entry": DoorEntry,
   "broker-flow": () => <BrokerJourney from={0} to={6} />,
   "broker-flow-2": () => <BrokerJourney from={6} to={12} />,
   logistics: LogisticsVisual,
   "shield-build": ShieldBuild,
+  "protection-vote": ProtectionVoteVisual,
+  "protection-map": ProtectionMapVisual,
   shield: ShieldAroundAssets,
   "quiet-warehouse": QuietWarehouse,
   "stylized-fire": WarehouseFire,
@@ -1152,7 +1268,10 @@ const registry: Record<string, () => React.ReactElement> = {
   "broker-slider": BrokerSlider,
   "final-question": BigQuestion,
   logo: LogoBadge,
-  "company-flow": CompanyFlow,
+  "contact-reveal": ContactReveal,
+  "contact-stats": ContactStats,
+  "contact-serves": ContactServes,
+  "contact-flow": ContactFlow,
   peek: PeekHantira
 };
 

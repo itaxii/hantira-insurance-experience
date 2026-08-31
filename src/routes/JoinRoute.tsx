@@ -7,6 +7,7 @@ import { useExperienceStore } from "../lib/experienceStore";
 import { nicknameErrorMessage, sanitizeNickname } from "../lib/nickname";
 import { createParticipantSessionId, loadStoredSession, rememberVote, saveStoredSession, selectedVotesFor, type StoredSession } from "../lib/session";
 import { canJoinRoom } from "../lib/roomState";
+import { getBeatInteraction } from "../lib/story";
 import { isCorrectSelection } from "../lib/votes";
 import type { CharacterAnimation, CharacterExpression } from "../types";
 
@@ -24,8 +25,10 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
   const [error, setError] = useState("");
   const [session, setSession] = useState<StoredSession | null>(() => loadStoredSession(roomCode));
   const [draftSelected, setDraftSelected] = useState<string[]>([]);
+  const [submittedInteraction, setSubmittedInteraction] = useState<string | null>(null);
   const scene = scenes[store.room.current_scene];
-  const interaction = scene?.interaction;
+  const beat = scene?.beats[store.room.current_beat];
+  const interaction = getBeatInteraction(scene, beat?.id);
   const votes = interaction ? selectedVotesFor(store.votes, session?.participantSessionId ?? "", interaction.id) : [];
   const selected = votes.length ? votes : draftSelected;
   const waitingState = waiting[(store.room.current_scene + store.room.current_beat) % waiting.length];
@@ -36,6 +39,7 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
 
   useEffect(() => {
     setDraftSelected([]);
+    setSubmittedInteraction(null);
   }, [interaction?.id]);
 
   const selectedLabels = useMemo(
@@ -99,6 +103,8 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
   const locked = votes.length > 0 && !interaction.allowChange;
   const revealed = store.room.answer_revealed;
   const correctness = revealed ? isCorrectSelection(interaction, selected) : null;
+  const hasRecordedVote = votes.length > 0 || Boolean(session.votes[interaction.id]?.length);
+  const showSubmitConfirmation = hasRecordedVote || submittedInteraction === interaction.id;
 
   return (
     <MobileShell status="online" nickname={session.nickname}>
@@ -128,13 +134,21 @@ export function JoinRoute({ roomCode }: { roomCode: string }) {
         })}
       </div>
       {selected.length > 0 && <p className="personal-choice">اختيارك: {selectedLabels.join("، ")}</p>}
+      {showSubmitConfirmation && (
+        <p className="success">
+          {interaction.type === "multi" ? "تم تسجيل اختياراتك ✅" : `تم تسجيل اختيارك يا ${session.nickname} ✅`}
+        </p>
+      )}
       {store.room.voting_open && !locked && (
         <button
           className="primary"
           disabled={selected.length === 0}
-          onClick={() => {
-            const ok = store.submitVote(interaction.id, session.participantSessionId, selected, interaction.allowChange);
-            if (ok) setSession(rememberVote(session, interaction.id, selected));
+          onClick={async () => {
+            const ok = await Promise.resolve(store.submitVote(interaction.id, session.participantSessionId, selected, interaction.allowChange));
+            if (ok) {
+              setSession(rememberVote(session, interaction.id, selected));
+              setSubmittedInteraction(interaction.id);
+            }
           }}
         >
           {interaction.type === "multi" && selected.length > 1 ? `سجل اختياري (${selected.length})` : "سجل اختياري"}

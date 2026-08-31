@@ -2,11 +2,11 @@
 
 ## Story Engine
 
-`src/data/scenes.ts` defines the full presentation as typed `Scene` objects. `src/lib/story.ts` handles clamped positions, next/previous beat movement, active beat lookup, and the one-time QR scene check.
+`src/data/scenes.ts` defines the full presentation as typed `Scene` objects. `src/lib/story.ts` handles clamped positions, next/previous beat movement, active beat lookup, beat-level interaction gating, and the one-time QR scene check.
 
 ## Beat Engine
 
-Presentation mode reads `room.current_scene` and `room.current_beat`, then renders the matching beat. Keyboard navigation updates room state so connected audience devices receive the active interaction automatically.
+Presentation mode reads `room.current_scene` and `room.current_beat`, then renders the matching beat. Keyboard navigation updates room state so connected audience devices receive the active interaction automatically. Scenes can optionally declare `interactionBeatIds` so setup/payoff beats stay story-only while the vote appears on the intended beats.
 
 ## Character System
 
@@ -31,3 +31,7 @@ Single and multi-select votes use one row per selected option. Locked votes reje
 ## Name Visualization
 
 `ResultsView` samples names by option and limits display volume. Full name display is only used for small groups; sample mode avoids dumping large audience lists.
+
+## Branding
+
+Contact brand values live in `src/config.ts` and `src/config/contactTheme.ts`. The supplied logo is served from `public/assets/brand/contact-insurance-brokerage.png`; CSS variables expose the Contact yellow, amber, and orange accents without embedding secrets or private assets.

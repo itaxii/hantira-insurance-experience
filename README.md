@@ -1,6 +1,6 @@
 # حنتيرة في عالم التأمين
 
-Interactive Arabic web presentation for explaining insurance and the role of an Insurance Broker through story, SVG stick-man animation, game-show voting, and mobile audience participation.
+Interactive Arabic web presentation for explaining insurance and the role of an Insurance Broker through story, SVG stick-man animation, game-show voting, mobile audience participation, and Contact Insurance Brokerage branding.
 
 ## Routes
 
@@ -39,6 +39,10 @@ Enable Supabase Anonymous Sign-Ins, run `supabase/migrations/20260830160000_hant
 ## Presentation Flow
 
 Open `/control`, create/show a room, open `/present`, show the QR once, wait for nicknames, then start the journey. Audience phones stay connected and receive questions automatically.
+
+## Branding
+
+Contact-specific public content is centralized in `src/config.ts`, with color tokens in `src/config/contactTheme.ts` and the supplied logo in `public/assets/brand/contact-insurance-brokerage.png`. Replace only those config values/assets for another branded run.
 
 ## Testing
 

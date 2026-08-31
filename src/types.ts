@@ -66,6 +66,7 @@ export type Scene = {
   onceOnlyQr?: boolean;
   beats: Beat[];
   interaction?: InteractionDefinition;
+  interactionBeatIds?: string[];
 };
 
 export type StoryPosition = {

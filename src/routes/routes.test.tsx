@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { PresentRoute } from "./PresentRoute";
 import { JoinRoute } from "./JoinRoute";
 import { ControlRoute } from "./ControlRoute";
 import { appConfig } from "../config";
+import { scenes } from "../data/scenes";
+import { makeRoom } from "../lib/roomState";
+import { saveStoredSession } from "../lib/session";
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 describe("route smoke (local rehearsal mode)", () => {
   it("starts on the one-time QR join scene, then advances beats with the keyboard", async () => {
@@ -32,5 +39,26 @@ describe("route smoke (local rehearsal mode)", () => {
     render(<ControlRoute />);
     expect(screen.getByText("Room")).toBeTruthy();
     expect(screen.getByText("Story")).toBeTruthy();
+  });
+
+  it("confirms submitted multi-select votes on the audience phone", async () => {
+    const room = {
+      ...makeRoom("7284"),
+      current_scene: scenes.findIndex((scene) => scene.id === "build-protection"),
+      current_beat: scenes.find((scene) => scene.id === "build-protection")?.beats.findIndex((beat) => beat.id === "vote") ?? 1,
+      voting_open: true,
+      active_interaction: "build-protection",
+      status: "live" as const
+    };
+    localStorage.setItem("hantira-local-room", JSON.stringify({ room, participants: [], votes: [] }));
+    saveStoredSession({ participantSessionId: "participant-qa", roomCode: "7284", nickname: "محمد QA", votes: {} });
+
+    render(<JoinRoute roomCode="7284" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Motor" }));
+    fireEvent.click(screen.getByRole("button", { name: "Property" }));
+    fireEvent.click(screen.getByRole("button", { name: "سجل اختياري (2)" }));
+
+    await waitFor(() => expect(screen.getByText("تم تسجيل اختياراتك ✅")).toBeTruthy());
   });
 });
