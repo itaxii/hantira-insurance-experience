@@ -8,14 +8,17 @@ import { applyPosition, makeRoom } from "../lib/roomState";
 import { moveBeat } from "../lib/story";
 import { appHref, joinUrl } from "../lib/routing";
 import { hasSupabaseConfig, supabase } from "../lib/supabaseClient";
-import { isPresenterSessionAllowed, presenterSecurityNote } from "../lib/presenterAuth";
+import { isPresenterAllowListed, isPresenterSessionAllowed, presenterSecurityNote } from "../lib/presenterAuth";
 import { useActiveRoomCode } from "../lib/activeRoom";
+
+type PresenterAccess = "signed-out" | "checking" | "allowed" | "denied";
 
 export function ControlRoute() {
   const [roomCode, setRoomCode] = useActiveRoomCode();
   const store = useExperienceStore(roomCode);
   const [query, setQuery] = useState("");
   const [authUser, setAuthUser] = useState<User | null>(null);
+  const [presenterAccess, setPresenterAccess] = useState<PresenterAccess>(hasSupabaseConfig ? "checking" : "allowed");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
@@ -27,18 +30,49 @@ export function ControlRoute() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => setAuthUser(data.user));
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => setAuthUser(session?.user ?? null));
+    supabase.auth.getUser().then(({ data }) => {
+      setAuthUser(data.user);
+      if (!data.user) setPresenterAccess("signed-out");
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ?? null);
+      if (!session?.user) setPresenterAccess("signed-out");
+    });
     return () => data.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!supabase || !authUser) return;
+    if (!isPresenterSessionAllowed(authUser)) {
+      setPresenterAccess("denied");
+      return;
+    }
+    let cancelled = false;
+    setPresenterAccess("checking");
+    isPresenterAllowListed(supabase, authUser)
+      .then((allowed) => {
+        if (!cancelled) setPresenterAccess(allowed ? "allowed" : "denied");
+      })
+      .catch((error: Error) => {
+        if (!cancelled) {
+          setPresenterAccess("denied");
+          setAuthError(error.message);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser]);
 
   const login = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!supabase) return;
     setAuthError(null);
+    setPresenterAccess("checking");
     const result = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (result.error) {
       setAuthError(result.error.message);
+      setPresenterAccess("signed-out");
       return;
     }
     setAuthUser(result.data.user);
@@ -48,9 +82,13 @@ export function ControlRoute() {
     if (!supabase) return;
     await supabase.auth.signOut();
     setAuthUser(null);
+    setPresenterAccess("signed-out");
   };
 
-  if (hasSupabaseConfig && !isPresenterSessionAllowed(authUser)) {
+  if (hasSupabaseConfig && presenterAccess !== "allowed") {
+    const lockedMessage = authUser && presenterAccess === "denied"
+      ? "الحساب ده سجل دخول بنجاح، لكنه مش مضاف في قائمة مقدمي العرض. ضيفه في public.presenters وبعدين اعمل Login تاني."
+      : null;
     return (
       <main className="control control-auth">
         <section className="control-panel auth-panel">
@@ -72,8 +110,13 @@ export function ControlRoute() {
                 required
               />
             </label>
+            {presenterAccess === "checking" ? <p className="privacy">بنتأكد من صلاحية مقدم العرض...</p> : null}
+            {lockedMessage ? <p className="error">{lockedMessage}</p> : null}
             {authError ? <p className="error">{authError}</p> : null}
-            <button className="primary" type="submit"><Lock size={18} /> Login</button>
+            <div className="button-row">
+              <button className="primary" type="submit"><Lock size={18} /> Login</button>
+              {authUser ? <button type="button" onClick={logout}>Logout</button> : null}
+            </div>
           </form>
         </section>
       </main>

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { isPresenterSessionAllowed } from "./presenterAuth";
+import { describe, expect, it, vi } from "vitest";
+import { isPresenterAllowListed, isPresenterSessionAllowed } from "./presenterAuth";
 
 describe("presenter auth", () => {
   it("rejects missing and anonymous sessions", () => {
@@ -10,5 +10,16 @@ describe("presenter auth", () => {
   it("allows a non-anonymous authenticated presenter session", () => {
     expect(isPresenterSessionAllowed({ id: "presenter-user", is_anonymous: false })).toBe(true);
     expect(isPresenterSessionAllowed({ id: "presenter-user" })).toBe(true);
+  });
+
+  it("checks the database presenter allow-list before unlocking controls", async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({ data: { user_id: "presenter-user" }, error: null });
+    const eq = vi.fn().mockReturnValue({ maybeSingle });
+    const select = vi.fn().mockReturnValue({ eq });
+    const from = vi.fn().mockReturnValue({ select });
+
+    await expect(isPresenterAllowListed({ from } as never, { id: "presenter-user", is_anonymous: false } as never)).resolves.toBe(true);
+    expect(from).toHaveBeenCalledWith("presenters");
+    expect(eq).toHaveBeenCalledWith("user_id", "presenter-user");
   });
 });

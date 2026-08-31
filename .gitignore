@@ -12,3 +12,4 @@ coverage/
 vite.config.js
 vite.config.d.ts
 supabase/.temp/
+.codex-remote-attachments/
